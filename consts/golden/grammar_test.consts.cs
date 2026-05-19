@@ -50,13 +50,26 @@ namespace art.media.platform.std {
 
     public static partial class Const {
         // Scalar string constants
-        public static readonly ulong  MaxFraction = 1000000000UL;
-        public static readonly ulong  HexConst    = 0xFFFFFFFFFFFFFFF0UL;
-        public static readonly double Pi          = 3.14159265358979;
-        public static readonly float  SmallPi     = 3.14f;
-        public static readonly double TwoPi       = 3.14159265358979;
+        public static readonly ulong  MaxFraction    = 1000000000UL;
+        public static readonly ulong  HexConst       = 0xFFFFFFFFFFFFFFF0UL;
+        public static readonly double Pi             = 3.14159265358979;
+        public static readonly float  SmallPi        = 3.14f;
+        public static readonly double TwoPi          = 3.14159265358979;
         // Bootstrapping node ID
-        public static readonly UID    TestingID   = new(0x7, 0x8);
+        public static readonly UID    TestingID      = new(0x7, 0x8);
+        // UUID literals — every form accepted by gofrs/uuid.FromString is normalized
+        // to the same {hi, lo} hex-pair output.  Same UUID, six syntactic spellings:
+        public static readonly UID    UUID_Canonical = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_Uppercase = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_Compact   = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_Braced    = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_URN       = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_MixedCase = new(0x550E8400E29B41D4, 0xA716446655440000);
+        // Sentinel UUIDs that downstream callers occasionally need to express.
+        public static readonly UID    UUID_Nil       = new(0x0000000000000000, 0x0000000000000000);
+        public static readonly UID    UUID_Max       = new(0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
+        // A distinct UUID, to confirm the parser disambiguates between sources.
+        public static readonly UID    HiMom          = new(0x6BA7B8109DAD11D1, 0x80B400C04FD430C8);
     }
 
 }

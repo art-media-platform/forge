@@ -124,6 +124,11 @@ func Generate(inputPath, goOutDir, csharpOutDir string, opts *GenOpts) error {
 	comments := ExtractComments(src)
 	comments.Attach(cf)
 
+	// Normalize UUID-string `uid` literals into canonical hex-pair form.
+	if err := rewriteUUIDLiterals(cf); err != nil {
+		return err
+	}
+
 	baseName := filepath.Base(inputPath)
 	stem := strings.TrimSuffix(baseName, filepath.Ext(baseName))
 	stem = strings.TrimSuffix(stem, ".consts") // amp.std.consts.sdl → amp.std

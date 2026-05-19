@@ -36,6 +36,22 @@ tags Name {
 // Bootstrapping node ID
 const uid TestingID = {0x7, 0x8};
 
+// UUID literals — every form accepted by gofrs/uuid.FromString is normalized
+// to the same {hi, lo} hex-pair output.  Same UUID, six syntactic spellings:
+const uid UUID_Canonical  = "550e8400-e29b-41d4-a716-446655440000";
+const uid UUID_Uppercase  = "550E8400-E29B-41D4-A716-446655440000";
+const uid UUID_Compact    = "550e8400e29b41d4a716446655440000";
+const uid UUID_Braced     = "{550e8400-e29b-41d4-a716-446655440000}";
+const uid UUID_URN        = "urn:uuid:550e8400-e29b-41d4-a716-446655440000";
+const uid UUID_MixedCase  = "550e8400-E29B-41d4-A716-446655440000";
+
+// Sentinel UUIDs that downstream callers occasionally need to express.
+const uid UUID_Nil  = "00000000-0000-0000-0000-000000000000";
+const uid UUID_Max  = "ffffffff-ffff-ffff-ffff-ffffffffffff";
+
+// A distinct UUID, to confirm the parser disambiguates between sources.
+const uid HiMom = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+
 // Scalar string constants
 const uint64 MaxFraction     = 1000000000;
 const uint64 HexConst        = 0xFFFFFFFFFFFFFFF0;

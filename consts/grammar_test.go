@@ -27,6 +27,10 @@ func TestGolden(t *testing.T) {
 	cm := ExtractComments(src)
 	cm.Attach(cf)
 
+	if err := rewriteUUIDLiterals(cf); err != nil {
+		t.Fatalf("rewriteUUIDLiterals: %v", err)
+	}
+
 	opts := &GenOpts{SourceName: "grammar_test.sdl"}
 
 	goOut, err := GenerateGo(cf, opts)

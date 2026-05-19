@@ -35,7 +35,20 @@ var Name = struct {
 
 var (
 	// Bootstrapping node ID
-	TestingID = tag.UID{0x7, 0x8}
+	TestingID      = tag.UID{0x7, 0x8}
+	// UUID literals — every form accepted by gofrs/uuid.FromString is normalized
+	// to the same {hi, lo} hex-pair output.  Same UUID, six syntactic spellings:
+	UUID_Canonical = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
+	UUID_Uppercase = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
+	UUID_Compact   = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
+	UUID_Braced    = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
+	UUID_URN       = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
+	UUID_MixedCase = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
+	// Sentinel UUIDs that downstream callers occasionally need to express.
+	UUID_Nil       = tag.UID{0x0000000000000000, 0x0000000000000000}
+	UUID_Max       = tag.UID{0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF}
+	// A distinct UUID, to confirm the parser disambiguates between sources.
+	HiMom          = tag.UID{0x6BA7B8109DAD11D1, 0x80B400C04FD430C8}
 )
 
 const (
