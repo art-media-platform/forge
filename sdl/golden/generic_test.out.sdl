@@ -1,0 +1,329 @@
+forge:options {
+    go_auto_generate
+    go_package "std"
+    go_import_as "github.com/art-media-platform/amp.SDK/amp/std"
+    csharp_auto_generate
+    csharp_namespace "art.media.platform"
+}
+
+std {
+    Session
+    App
+    AppModule
+    Planet
+    Globe
+    Item
+    Tile
+}
+
+std.Session {
+    LoginStart
+    LoginChallenge
+    LoginResponse
+    SessionCheckpoint.Tags
+    Message.Tags
+    Launch.Tags
+    Launch.Tags.OAuth
+    PinRequest
+    PinAdjust.Tags
+}
+
+std.Item {
+    Text.Tag {
+        Label
+        Caption
+        Collection
+        Synopsis
+    }
+    Layout.Tags
+    Theme.Tags
+    Some.SubScope {
+        Apples
+        Oranges
+    }
+    Link.ID
+}
+
+std.Content {
+    FSInfo
+    Glyph.Tags
+    Media.Tag
+    Vis.Invocation.Tags
+    Vis.Preset.Tags
+    Type {
+        Image "image/*"
+        Audio "audio/*"
+        Video "video/*"
+        Directory "application/x-directory"
+        URI_Prefix "amp:glyph/"
+    }
+}
+
+std.Tile {
+    Layout
+    Theme.Tags
+}
+
+std.Channel {
+    Space.Globe
+    Space.Local
+    Notes
+    Documents
+    Journal
+    Calendar
+    Timeline
+    Messages
+    Spreadsheet
+    Playlist
+    Playlist.VJ
+    LinkTree
+}
+
+amp.test {
+    f0 45.67
+    f1 0.64
+    f2 0.64
+    f3 0.64
+    f3 45.
+    someInt 123
+    someStr "Hello, World!"
+    someBool true
+    someDate 2023-10-31
+    someTime 14:30:15
+    someDateTime 2023-10-31 T14:30:15Z
+    someNull null
+}
+
+std.UICard {
+    std.Pen.State {
+        step.right "3:00"
+        step.newline "6:00"
+        std.Glyph.aspect 1. x=0 y=0 direction=3
+    }
+    std.Layout.Path direction="3:00" thick=10 kern=2 {
+        std.Glyph height=10 "amp:glyph/std.select.location"
+        std.Heading height=6 "Select Location\n"
+        std.Caption height=4 "Choose the first half of your member ID\n\n"
+        std.TileSelector
+    }
+    std.Layout.Story {
+        std.Layout.Column {
+            std.Heading {
+                std.Glyph height=10 "amp:glyph/std.select.location"
+                std.Title height=6 "Select Location"
+                std.Caption height=4 "This is the first half of your public ID and can be anywhere "
+            }
+            std.TextField {
+                std.Label height=4 "Location"
+                std.Caption height=3 "City, State, Country"
+            }
+            std.OneOf {
+                std.value.binding "welcome.ID.generate.step.1"
+            }
+        }
+    }
+}
+
+amp.menu.std.inserter.rectangular {
+    insert.start.ij [0,0]
+    insert.cell.size.ij [4,1]
+    insert.cell.step.ij [5,0]
+    page.columns 2
+    page.rows 10
+    page.step.ij [80,0]
+}
+
+emptyTag
+
+three.scope.tag
+
+scope:TagName
+
+scope:sub.tag
+
+intTag 123 456 789
+
+name "John Doe"
+
+personthing "John" 25 true
+
+coordinates 10 15.5 "point-A"
+
+singleQuoted "This is a single-quoted string"
+
+doubleQuoted "This is a double-quoted string"
+
+description "" "This is a\nmultiline description\nthat spans multiple lines." ""
+
+integer 42
+
+negative -42
+
+floating 3.14159
+
+scientific 0.000123
+
+isActive true
+
+isDisabled false
+
+createdDate 2023-10-31
+
+createdTime 14:30:15
+
+createdDateTime 2023-10-31 T14:30:15Z
+
+dateTimeWithOffset 2023-10-31 T14:30:15+02:00 null
+
+Value null
+
+user name="John" age=30 isAdmin=true
+
+file "document.txt" size=1024 readOnly=false
+
+content namespace:type="article" namespace:language="en"
+
+xml:element "content"
+
+ui:button ui:label="Click me" ui:enabled=true
+
+parent {
+    child1 "value"
+    child2 42
+    grandchild {
+        value "nested value"
+    }
+}
+
+parent2 "main" {
+    child1 "first"
+    child2 "second"
+}
+
+person name="Alice" {
+    age 25
+}
+
+ "Anonymous tag value"
+
+system.config.timeout 30 ident=123
+
+very.de
+
+fruits {
+     "apple" "banana" "orange"
+}
+
+book
+
+server ip="192.168.1.1" port=8080
+
+server ip="192.168.1.2" port=8081
+
+database {
+    connection {
+        driver "PostgreSQL"
+        host "localhost"
+        port 5432
+        credentials {
+            username "admin"
+            password "secure123"
+        }
+    }
+    pool {
+        maxConnections 100
+        idleTimeout 30
+        m
+    }
+}
+
+ui:component type="button" {
+    ui:property name="label" value="Click Me"
+    ui:property name="width" value=120
+    ui:property name="enabled" value=true
+    ui:event name="onClick" {
+        ui:action "showDialog" target="confirmDialog"
+    }
+    ui:styles {
+        ui:style name="background-color" value="#3498db"
+        ui:style name="color" value="#ffffff"
+    }
+}
+
+network {
+    interfaces {
+        interface name="eth0" {
+            addressing type="dhcp"
+            mac_address "00:11:22:33:44:55"
+        }
+        interface name="eth1" {
+            addressing type="static" {
+                ip "192.168.1.10"
+                netmask "255.255.255.0"
+                gateway "192.168.1.1"
+            }
+            mac_address "00:11:22:33:44:56"
+        }
+    }
+    firewall enabled=true {
+        policy input="DROP"
+        policy output="ACCEPT"
+        policy forward="DROP"
+        rule action="ACCEPT" protocol="tcp" destination_port=22
+        rule action="ACCEPT" protocol="tcp" destination-port=80
+        rule action="ACCEPT" protocol="tcp" destination-port=443
+    }
+}
+
+localization {
+    language id="en" {
+        string id="welcome" value="Welcome"
+        string id="goodbye" value="Goodbye"
+    }
+    language id="es" {
+        string id="welcome" value="Bienvenido"
+        string id="goodbye" value="Adiós"
+    }
+}
+
+my_tag
+
+first_name "Akiko"
+
+last_name "Johnson"
+
+height 68
+
+person "Akiko" "Johnson" 68
+
+person first_name="Akiko" last_name="Johnson" height=68
+
+person "Akiko" "Johnson" height=60
+
+person name:first-name="Akiko" name:last-name="Johnson"
+
+my_namespace:person "Akiko" "Johnson" dimensions:height=68 {
+    son "Nouhiro" "Johnson"
+    daughter "Sabrina" "Johnson" location="Italy" {
+        hobbies "swimming" "surfing"
+        languages "English" "Italian"
+        smoker false
+    }
+}
+
+date1 2005-11-23
+
+date2 2005/11/23
+
+entry 2005/11/23 10:14:23.253-GMT "Something bad happened" error=true
+
+mylist "something" "another" true "shoe" 2002/12/13 "rock" "morestuff" "sink" "penny" 12:15:23.425
+
+files {
+     "/folder1/file.txt" "/file2.txt"
+}
+
+matrix {
+     1 2 3 4 5 6
+}
+

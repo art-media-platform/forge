@@ -1,0 +1,547 @@
+
+
+
+forge:options {
+
+    # Go code generation
+    go_auto_generate
+    go_package "std"
+    go_import_as "github.com/art-media-platform/amp.SDK/amp/std"
+
+    # C# code generation
+    csharp_auto_generate
+    csharp_namespace "art.media.platform"
+
+}
+
+
+std {
+    Session
+    App
+    AppModule
+    Planet
+    Globe
+    Item
+    Tile
+}
+
+std.Session {
+
+    // session state
+    LoginStart
+    LoginChallenge
+    LoginResponse
+    SessionCheckpoint.Tags
+    Message.Tags
+
+    # requests
+    Launch.Tags
+    Launch.Tags.OAuth
+    PinRequest
+    PinAdjust.Tags
+}
+
+
+std.Item {
+
+    Text.Tag {
+        Label
+        Caption
+        Collection
+        Synopsis
+    }
+
+    // Tile {
+    //     # tile layout
+    //     Layout.Tags
+    //     Theme.Tags
+
+    //     # tile content
+    //     Content.Tags
+    //     Content.Type.Tags
+
+    //     # tile type
+    //     Type.Tags
+    // }
+    // # sheets / application controllers
+    // Content {
+    //     Tags
+    //     Type.Tags
+    // }
+
+    # tile layout and theme
+    Layout.Tags
+    Theme.Tags
+
+    Some.SubScope {
+        Apples
+        Oranges
+    }
+
+    Link.ID  # UID inline enum ID / aka node / item / child reference
+}
+
+
+
+
+std.Content {
+    FSInfo
+    Glyph.Tags  # TxOp.ItemID expresses a glyph identifier
+    #TODO Glyph.Tag  # TxOp.ItemID expresses a glyph identifier
+    #TODO Link.Tag   # TxOp.ItemID expresses a link attribute ID
+    #TODO Media.Playable.Tag  # TxOp.ItemID expresses a playable media attribute ID
+    Media.Tag
+    Vis.Invocation.Tags
+    Vis.Preset.Tags
+
+    Type {
+        Image "image/*"
+        Audio "audio/*"
+        Video "video/*"
+        Directory "application/x-directory"
+        URI_Prefix "amp:glyph/"
+    }
+}
+
+
+std.Tile {
+    Layout
+    Theme.Tags
+}
+
+
+std.Channel {
+    Space.Globe # spherical shells of tiles
+    Space.Local # othogonal 3D
+    Notes
+    Documents
+    Journal
+    Calendar
+    Timeline
+    Messages
+    Spreadsheet
+    Playlist
+    Playlist.VJ
+    LinkTree
+}
+
+
+
+
+/* one line comment */
+# other comment
+
+// This is a comprehensive SDLang example showcasing all major features
+// SDL supports C-style single-line comments
+
+
+//  /* It also supports
+//    C-style multi-line
+//    comments */
+
+
+amp.test{
+    f0 45.67
+    f1  .64
+    f2 0.64
+    f3 00.64
+    f3 45.
+
+    someInt 123
+    someStr "Hello, World!"
+    someBool true
+    someDate 2023-10-31
+    someTime 14:30:15
+    someDateTime 2023-10-31T14:30:15Z
+    someNull null
+}
+
+// Coordinate system inspired by Logo language.
+//
+// The "insertion point" sets the top-left corner of incoming cells to be inserted.
+// The insertion point is moved by the insert.cell.step.ij after each cell is inserted.
+std.UICard {
+
+    std.Pen.State {   // MOVE THIS TO PYTHON?
+        step.right   "3:00"  // aka to the right, margin in mm
+        step.newline "6:00"  // aka down
+        std.Glyph.aspect 1.0
+        x=0 y=0 direction=3  // "up" 0:00, 3:00, 6:00, 9:00, etc clockwise.  24:00 is two full turns. (12 wraps)  better name for 'direction'?
+    }
+
+    std.Layout.Path direction="3:00" thick=10 kern=2 {  // thickness is in total mm (above+below) aka height when moving in 3:00 direction
+        std.Glyph    height=10  "amp:glyph/std.select.location"
+        std.Heading height= 6  "Select Location\n"
+        std.Caption  height= 4  "Choose the first half of your member ID\n\n"
+        std.TileSelector
+    }
+
+
+    std.Layout.Story {
+
+
+        std.Layout.Column {
+
+            // std.Heading height= 6 "Select Location"
+            // std.Caption height= 4 "The tile selected determines the first half of your member ID"
+
+            std.Heading {
+                std.Glyph   height=10 "amp:glyph/std.select.location"
+                std.Title   height= 6 "Select Location"
+                std.Caption height= 4 "This is the first half of your public ID and can be anywhere "
+            }
+
+            std.TextField {
+                std.Label height= 4 "Location"
+                std.Caption height= 3 "City, State, Country"
+            }
+
+
+
+            std.OneOf {
+                std.
+                value.binding "welcome.ID.generate.step.1"
+
+            }
+
+        }
+
+    }
+
+}
+
+amp.menu.std.inserter.rectangular {
+    insert.start.ij [0,0]
+    insert.cell.size.ij [4,1]
+    insert.cell.step.ij [5,0]
+    page.columns   2
+    page.rows     10
+    page.step.ij [80,  0] // place left to right
+}
+
+
+// Simple tag without values or attributes
+emptyTag
+
+three.scope.tag
+
+scope:TagName
+
+scope:sub.tag
+
+
+intTag   123  456 789
+
+// Tag with a single value
+name "John Doe"
+
+// Tag with multiple values of different types
+personthing "John" 25 true
+
+// Tags can have multiple values of different types
+coordinates 10 15.5 "point-A"
+
+//allowed-schema "public"
+
+//=============================================================================
+// Data Types
+//=============================================================================
+
+// Strings - both single and double quotes
+singleQuoted 'This is a single-quoted string'
+doubleQuoted "This is a double-quoted string"
+
+// Multiline strings with triple quotes
+description """This is a
+multiline description
+that spans multiple lines."""
+
+// Numbers - integers, floats, scientific notation
+integer 42
+negative -42
+floating 3.14159
+scientific 1.23e-4
+
+// Booleans
+isActive true
+isDisabled false
+
+
+// Date and time values (ISO-8601)
+createdDate 2023-10-31
+createdTime  14:30:15
+createdDateTime 2023-10-31T14:30:15Z
+dateTimeWithOffset 2023-10-31T14:30:15+02:00
+
+// Binary data (Base64 encoded)
+# TODO certificate [BASE64:SGVsbG8gU0RMYW5nIQ==]
+
+// Null value
+nullValue null
+
+// TimeSpan values (specific to SDLang)
+// TODO timeout 30d:5h:10m:15s
+// shortTimeout 5h:20m
+// veryShortTimeout 30s
+
+//=============================================================================
+// Attributes
+//=============================================================================
+
+// Tag with attributes
+user name="John" age=30 isAdmin=true
+
+// Tag with both values and attributes
+file "document.txt" size=1024 readOnly=false
+
+// Namespaced attributes
+content namespace:type="article" namespace:language="en"
+
+//=============================================================================
+// Namespaces
+//=============================================================================
+
+// Tag with namespace
+xml:element "content"
+
+// Fully namespaced tag with namespaced attributes
+ui:button ui:label="Click me" ui:enabled=true
+
+//=============================================================================
+// Hierarchical Structure
+//=============================================================================
+
+// Child tags defined with braces
+parent {
+    child1 "value"
+    child2 42
+
+    // Nesting can be arbitrary deep
+    grandchild {
+        value "nested value"
+    }
+}
+
+// Alternative syntax using semicolons to separate children
+parent2 "main" {
+    child1 "first";
+    child2 "second";
+}
+
+// Compact notation for single child
+person name="Alice" { age 25 }
+
+
+
+//=============================================================================
+// Special Features
+//=============================================================================
+
+// Anonymous tags (value-only tags)
+"Anonymous tag value"
+
+// Tag with dots in the name (hierarchy notation)
+system.config.timeout 30 ident=123
+
+// Tag paths
+very.de#ep.nested.tag "value"  yoyo:somethgin=123
+
+// Anonymous values can be used to create "lists"
+fruits {
+    "apple"
+    "banana"
+    "orange"
+}
+
+// Unique SDL features - tag with ID
+book#bestseller "The Great Novel" author="Jane Doe"
+
+// Tags with the same name but different content
+server ip="192.168.1.1" port=8080
+server ip="192.168.1.2" port=8081
+
+//=============================================================================
+// Practical Examples
+//=============================================================================
+
+
+
+// A more complex, practical example - Database configuration
+database {
+    connection {
+        driver "PostgreSQL"
+        host "localhost"
+        port 5432
+        credentials {
+            username "admin"
+            password "secure123"
+        }
+    }
+
+    pool {
+        maxConnections 100
+        idleTimeout 30m
+    }
+
+    // Multiple similar tags create an implicit list
+    // allowed-schema "public"  TODO fix me
+    // allowed-schema "users"
+    // allowed-schema "products"
+}
+
+// UI component definition
+ui:component type="button" {
+    ui:property name="label" value="Click Me"
+    ui:property name="width" value=120
+    ui:property name="enabled" value=true
+
+    ui:event name="onClick" {
+        ui:action "showDialog" target="confirmDialog"
+    }
+
+    ui:styles {
+        ui:style name="background-color" value="#3498db"
+        ui:style name="color" value="#ffffff"
+    }
+}
+
+
+
+
+// Network configuration example
+network {
+    interfaces {
+        interface name="eth0" {
+            addressing type="dhcp"
+            mac_address "00:11:22:33:44:55"
+        }
+
+        interface name="eth1" {
+            addressing type="static" {
+                ip "192.168.1.10"
+                netmask "255.255.255.0"
+                gateway "192.168.1.1"
+            }
+            mac_address "00:11:22:33:44:56"
+        }
+    }
+
+    firewall enabled=true {
+        // Default policies
+        policy input="DROP"
+        policy output="ACCEPT"
+        policy forward="DROP"
+
+        // Rules
+        rule action="ACCEPT" protocol="tcp" destination_port=22
+        rule action="ACCEPT" protocol="tcp" destination-port=80
+        rule action="ACCEPT" protocol="tcp" destination-port=443
+    }
+}
+
+// Localization example
+localization {
+    language id="en" {
+        string id="welcome" value="Welcome"
+        string id="goodbye" value="Goodbye"
+    }
+
+    language id="es" {
+        string id="welcome" value="Bienvenido"
+        string id="goodbye" value="Adiós"
+    }
+}
+
+
+
+# a tag having only a name
+my_tag
+
+# three tags acting as name value pairs
+first_name "Akiko"
+last_name "Johnson"
+height 68
+
+# a tag with a value list
+person "Akiko" "Johnson" 68
+
+# a tag with attributes
+person first_name="Akiko" last_name="Johnson" height=68
+
+# a tag with values and attributes
+person "Akiko" "Johnson" height=60
+
+# a tag with attributes using namespaces
+person name:first-name="Akiko" name:last-name="Johnson"
+
+# a tag with values, attributes, namespaces, and children
+my_namespace:person "Akiko" "Johnson" dimensions:height=68 {
+    son "Nouhiro" "Johnson"
+    daughter "Sabrina" "Johnson" location="Italy" {
+        hobbies "swimming" "surfing"
+        languages "English" "Italian"
+        smoker false
+    }
+}
+
+
+
+
+date1 2005-11-23
+date2 2005/11/23
+
+------------------------------------------------------------------
+-- (notice the separator style comment above...)
+
+# a log entry
+#     note - this tag has two values (date_time and string) and an
+#            attribute (error)
+entry 2005/11/23 10:14:23.253-GMT "Something bad happened" error=true
+
+# a long line
+mylist "something" "another" true "shoe" 2002/12/13 "rock" \
+    "morestuff" "sink" "penny" 12:15:23.425
+
+# a long string
+// text "this is a long rambling line of text with a continuation \
+//    and it keeps going and going..."
+
+# anonymous tag examples
+
+files {
+    "/folder1/file.txt"
+    "/file2.txt"
+}
+
+# To retrieve the files as a list of strings
+#
+#     List files = tag.getChild("files").getChildrenValues("content");
+#
+# We us the name "content" because the files tag has two children, each of
+# which are anonymous tags (values with no name.)  These tags are assigned
+# the name "content"
+
+matrix {
+    1 2 3
+    4 5 6
+}
+
+# To retrieve the values from the matrix (as a list of lists)
+#
+#     List rows = tag.getChild("matrix").getChildrenValues("content");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
