@@ -5,11 +5,10 @@
 namespace art.media.platform.std {
 
     public static partial class Name {
-
         // ─── This is a big fancy comment, ───────────────────────────────
-        public static readonly TagName AppTag   = new(new(0x9FC2012FD63F847A, 0x51AA55A31D90CD25), "app");        // 4ZS80KZPJZHJX53BKPNDFT1M95
+        public static readonly TagName AppTag              = new(new(0x9FC2012FD63F847A, 0x51AA55A31D90CD25), "app");        // 4ZS80KZPJZHJX53BKPNDFT1M95
 
-        public static readonly TagName AppState = new(new(0xB0E0A1DFE9CF1CE2, 0x6D372EA4CD284F8D), "app.state");  // 5HW2HXZUFG3MJ6UETFNM6KHMWE
+        public static readonly TagName AppState            = new(new(0xB0E0A1DFE9CF1CE2, 0x6D372EA4CD284F8D), "app.state");  // 5HW2HXZUFG3MJ6UETFNM6KHMWE
 
         // ─── This is a very descriptive comment ─────────────────────────
         // that spans multiple lines to exercise
@@ -21,23 +20,18 @@ namespace art.media.platform.std {
 
         public static readonly TagName LaunchWeb           = new(new(0x972CEB01661BA7F5, 0xC8E19B9BC9291F22), "session.tag.www");                  // 4R5MPH2THVNZUWJSDVMG4KK7T2
         public static readonly TagName ReallySuperLongName = new(new(0xAC9496188C89AB63, 0xF81E6F8687799949), "session.tag.reallysuperlongname");  // 5DKKC1J349PEJZH7MGHU3RM6B9
-
     }
 
     public static partial class ID {
+        public static readonly TagName SiteDownloads = new(new(0xFA5633BD0202D0E8, 0x382B9F0FC9EDD9E2), "http://acme.enlargements.com/downloads/");  // 7UBSTVU0H2U3N3HBWZ1Z4YVQG2
+        public static readonly TagName TestNet       = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 2681ZFCW558ERXSF1Y0S0Y6F3B
+        public static readonly TagName BestShow      = new(new(0x57B2E51533698C3F, 0x78FFA34D801D6675), "fraggle.rock");  // 2RQCKJBDV9JHZRJZX39Q01UTMP
+    }
 
-        public static readonly TagName HomeWebSite = new(new(0x5BD0C09BE74593E5, 0x0C8059DE0A9D0D50), "https://banana-stand.com");  // 2VU309RTU5KGKHT02TVS59U3BH
-
-        public static readonly TagName WindowsHosts = new(new(0x0C60D6FB30DBF09A, 0x713273FE8FA62A1B), "c:\\Windows\\System32\\drivers\\etc\\hosts");  // 0DD3CGQD6VY2E72DMMZU7UDBHV
-
-        public static readonly TagName KnownHosts = new(new(0xD19FC4D54C2527B0, 0xBF4C697F50B816EC), "file:{$HOME}.ssh/id_rsa");  // 6JMZ2EBM154YSCYM39GX8CH5RD
-
-        public static readonly TagName SiteDownloads = new(new(0x868D828288C7C420, 0x7F486F7861B829C6), "http://acme.enlargements.com/downloads/index.html");  // 46JQ185267SHH7YK3GG1HVHBF6
-
-        public static readonly TagName TestNet = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 2681ZFCW558ERXSF1Y0S0Y6F3B
-
-        public static readonly TagName BestShow = new(new(0x57B2E51533698C3F, 0x78FFA34D801D6675), "fraggle.rock");  // 2RQCKJBDV9JHZRJZX39Q01UTMP
-
+    public static partial class SomeFiles {
+        public static readonly string WindowsHosts = "C:\\Windows\\System32\\drivers\\etc\\hosts";
+        public static readonly string UnixHosts    = "/etc/hosts";
+        public static readonly string MacHosts     = "/private/etc/hosts";
     }
 
     public static partial class Moar {

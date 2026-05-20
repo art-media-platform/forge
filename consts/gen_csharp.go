@@ -80,16 +80,30 @@ func emitCSharpTagsBlock(buf *strings.Builder, tb *TagsBlock, indent string) {
 	buf.WriteString(indent + "public static partial class " + tb.Name + " {\n")
 
 	sections := buildTagSections(tb.Entries)
+
+	// Measure max var name width across all entries for shared column alignment
+	maxVar := 0
 	for _, sec := range sections {
-		buf.WriteString("\n")
-		emitCSharpTagSection(buf, &sec, indent+"    ")
+		for _, entry := range sec.entries {
+			if n := len(entry.varName); n > maxVar {
+				maxVar = n
+			}
+		}
 	}
 
-	buf.WriteString("\n" + indent + "}\n")
+	for i := range sections {
+		if blankBetweenSections(sections, i) {
+			buf.WriteString("\n")
+		}
+		emitCSharpTagSection(buf, &sections[i], indent+"    ", maxVar)
+	}
+
+	buf.WriteString(indent + "}\n")
 }
 
 // emitCSharpTagSection writes one alignment group of C# tag entries.
-func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, indent string) {
+// maxVar is the block-global var name width so flat sections align together.
+func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, indent string, maxVar int) {
 	if len(sec.entries) == 0 {
 		return
 	}
@@ -99,8 +113,7 @@ func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, indent string) 
 		emitSectionHeader(buf, sec.comment, indent+"// ")
 	}
 
-	// Measure column widths
-	maxVar := 0
+	// First pass: build expressions and measure code column width
 	maxCode := 0
 
 	type csLine struct {
@@ -109,27 +122,24 @@ func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, indent string) 
 	}
 
 	lines := make([]csLine, len(sec.entries))
-	for idx, entry := range sec.entries {
-		lines[idx] = csLine{
+	for i, entry := range sec.entries {
+		lines[i] = csLine{
 			expr:   csTagExpr(&entry) + ";",
 			base32: entry.base32,
 		}
-		if n := len(entry.varName); n > maxVar {
-			maxVar = n
-		}
 	}
 
-	for idx, entry := range sec.entries {
+	for i, entry := range sec.entries {
 		varPad := strings.Repeat(" ", maxVar-len(entry.varName))
-		code := "public static readonly TagName " + entry.varName + varPad + " = " + lines[idx].expr
+		code := "public static readonly TagName " + entry.varName + varPad + " = " + lines[i].expr
 		if n := len(code); n > maxCode {
 			maxCode = n
 		}
 	}
 
 	// Emit aligned entries
-	for idx, entry := range sec.entries {
-		cl := lines[idx]
+	for i, entry := range sec.entries {
+		cl := lines[i]
 
 		if entry.leadComment != "" && entry.leadComment != sec.comment {
 			for _, line := range strings.Split(entry.leadComment, "\n") {
@@ -188,19 +198,19 @@ func emitCSharpConstClass(buf *strings.Builder, className string, decls []*Const
 		code   string
 	}
 	lines := make([]constLine, len(decls))
-	for idx, member := range decls {
+	for i, member := range decls {
 		csType := csharpType(member.Type)
 		typePad := strings.Repeat(" ", maxType-len(csType))
 		varPad := strings.Repeat(" ", maxVar-len(member.VarName))
 		code := "public static readonly " + csType + typePad + " " + member.VarName + varPad + " = " + csharpConstValue(member.Type, member.Value) + ";"
-		lines[idx] = constLine{csType: csType, code: code}
+		lines[i] = constLine{csType: csType, code: code}
 		if n := len(code); n > maxCode {
 			maxCode = n
 		}
 	}
 
-	for idx, member := range decls {
-		cl := lines[idx]
+	for i, member := range decls {
+		cl := lines[i]
 
 		// Per-entry doc comment
 		if member.LeadComment != "" && member.LeadComment != sectionComment {

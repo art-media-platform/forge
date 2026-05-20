@@ -138,10 +138,13 @@ func emitGoTagsStruct(buf *strings.Builder, tb *TagsBlock) {
 	}
 	buf.WriteString("}{\n")
 
-	// Initialized values — blank line before each section
-	for _, sec := range sections {
-		buf.WriteString("\n")
-		emitGoTagSection(buf, &sec, maxVar)
+	// Initialized values — a blank line sets off grouped sections; runs of flat
+	// single entries pack together.
+	for i := range sections {
+		if blankBetweenSections(sections, i) {
+			buf.WriteString("\n")
+		}
+		emitGoTagSection(buf, &sections[i], maxVar)
 	}
 
 	buf.WriteString("}\n")
@@ -166,20 +169,20 @@ func emitGoTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 		base32 string
 	}
 	lines := make([]goLine, len(sec.entries))
-	for idx, entry := range sec.entries {
+	for i, entry := range sec.entries {
 		varPad := strings.Repeat(" ", maxVar-len(entry.varName))
-		lines[idx] = goLine{
+		lines[i] = goLine{
 			code:   entry.varName + varPad + ": " + goTagExpr(&entry) + ",",
 			base32: entry.base32,
 		}
-		if n := len(lines[idx].code); n > maxCode {
+		if n := len(lines[i].code); n > maxCode {
 			maxCode = n
 		}
 	}
 
 	// Second pass: emit aligned entries (canonic is visible in the literal, comment is just Base32)
-	for idx, entry := range sec.entries {
-		gl := lines[idx]
+	for i, entry := range sec.entries {
+		gl := lines[i]
 
 		// Per-entry doc comment (skip if same text as section header)
 		if entry.leadComment != "" && entry.leadComment != sec.comment {

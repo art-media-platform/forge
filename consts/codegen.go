@@ -66,11 +66,11 @@ func sectionIsGroup(sec *tagSection) bool {
 	return sec.comment != "" || len(sec.entries) > 1
 }
 
-// blankBetweenSections reports whether a blank line belongs before section idx,
+// blankBetweenSections reports whether a blank line belongs before section i,
 // given the section list.  The first section never gets a leading blank; later
 // sections get one only when they or their predecessor read as a group.
-func blankBetweenSections(sections []tagSection, idx int) bool {
-	return idx > 0 && (sectionIsGroup(&sections[idx-1]) || sectionIsGroup(&sections[idx]))
+func blankBetweenSections(sections []tagSection, i int) bool {
+	return i > 0 && (sectionIsGroup(&sections[i-1]) || sectionIsGroup(&sections[i]))
 }
 
 // resolveTagEntries recursively flattens tag entries into output lines,
