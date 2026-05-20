@@ -23,6 +23,7 @@ type GenTargets struct {
 	GoOut     string // Go output directory
 	CSharpOut string // C# output directory
 	TSOut     string // TypeScript output directory
+	PyOut     string // Python output directory
 }
 
 // resolvedEntry holds pre-computed data for one tag entry output line.
@@ -192,6 +193,18 @@ func Generate(inputPath string, out GenTargets, opts *GenOpts) error {
 			return fmt.Errorf("generating TypeScript: %w", err)
 		}
 		outPath := filepath.Join(out.TSOut, stem+".consts.ts")
+		if err := os.WriteFile(outPath, src, 0644); err != nil {
+			return fmt.Errorf("writing %s: %w", outPath, err)
+		}
+		fmt.Printf("=> %s\n", outPath)
+	}
+
+	if out.PyOut != "" {
+		src, err := GeneratePython(cf, opts)
+		if err != nil {
+			return fmt.Errorf("generating Python: %w", err)
+		}
+		outPath := filepath.Join(out.PyOut, stem+".consts.py")
 		if err := os.WriteFile(outPath, src, 0644); err != nil {
 			return fmt.Errorf("writing %s: %w", outPath, err)
 		}

@@ -17,7 +17,7 @@ func main() {
 
 var CLI struct {
 	SDL    FilterSDL `cmd:"" help:"Process SDL files."`
-	Consts ConstsGen `cmd:"" help:"Generate Go/C#/TypeScript from .consts.sdl files."`
+	Consts ConstsGen `cmd:"" help:"Generate Go/C#/TypeScript/Python from .consts.sdl files."`
 }
 
 type ConstsGen struct {
@@ -25,6 +25,7 @@ type ConstsGen struct {
 	GoOut     string `name:"go_out"      help:"Go output directory"         optional:""`
 	CSharpOut string `name:"csharp_out"  help:"C# output directory"         optional:""`
 	TSOut     string `name:"ts_out"      help:"TypeScript output directory" optional:""`
+	PyOut     string `name:"py_out"      help:"Python output directory"     optional:""`
 }
 
 func (cmd *ConstsGen) Run() error {
@@ -32,6 +33,7 @@ func (cmd *ConstsGen) Run() error {
 		GoOut:     cmd.GoOut,
 		CSharpOut: cmd.CSharpOut,
 		TSOut:     cmd.TSOut,
+		PyOut:     cmd.PyOut,
 	}, nil)
 }
 

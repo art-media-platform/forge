@@ -1,6 +1,6 @@
 # forge
 
-A codegen tool for **cross-language string and numerical constants** — the kind that need to stay byte-identical between Go, C#, TypeScript, and other languages, with deterministic IDs that never drift across rebuilds.  PRs for other languages happily accepted.
+A codegen tool for **cross-language string and numerical constants** — the kind that need to stay byte-identical between Go, C#, TypeScript, Python, and other languages, with deterministic IDs that never drift across rebuilds.  PRs for other languages happily accepted.
 
 ## The Problem
 
@@ -46,7 +46,7 @@ Run:
 
 ```
 go run github.com/art-media-platform/forge/cmd/forge@latest consts your-project.consts.sdl \
-    --go_out=./go --csharp_out=./csharp --ts_out=./ts
+    --go_out=./go --csharp_out=./csharp --ts_out=./ts --py_out=./py
 ```
 
 Generated **Go**:
@@ -111,6 +111,33 @@ export const SDKVersion:      string = "2026.05.18";
 export const MaxItemsPerPage: bigint = 1000n;
 ```
 
+Generated **Python** — zero dependencies, stdlib `NamedTuple` records that are typed, immutable, and hashable (usable as dict keys):
+
+```python
+from typing import NamedTuple
+
+UID = tuple[int, int]
+
+
+class TagName(NamedTuple):
+    id:      UID
+    canonic: str
+
+
+class ID:
+    SiteDownloads = TagName((0xB30..., 0x379...), "http://acme.com/downloads/")
+    TestNet       = TagName((0x464..., 0xDC3...), "your-scheme://server.com:23382/path")
+    BestShow      = TagName((0x57B..., 0x78F...), "fraggle.rock")
+
+
+VendorAPIKey: UID = (0x550..., 0xA71...)
+
+
+APIVersion:      str = "v3.1.0"
+SDKVersion:      str = "2026.05.18"
+MaxItemsPerPage: int = 1000
+```
+
 Notice the `Canonic` field: forge normalizes each name before hashing — URLs and file paths keep their structure (scheme lowercased per RFC 3986), while plain text folds spaces and capitalization to a dotted form (`"Fraggle Rock"` → `"fraggle.rock"`). Equivalent spellings collapse to the same UID (full rules in the [`tag.UID`](#taguid) section below).
 
 ## `tag.UID`
@@ -133,6 +160,7 @@ The repo's golden test exercises every grammar feature — tag hierarchies, UUID
 | [`grammar_test.consts.go`](consts/golden/grammar_test.consts.go) | generated Go |
 | [`grammar_test.consts.cs`](consts/golden/grammar_test.consts.cs) | generated C# |
 | [`grammar_test.consts.ts`](consts/golden/grammar_test.consts.ts) | generated TypeScript |
+| [`grammar_test.consts.py`](consts/golden/grammar_test.consts.py) | generated Python |
 
 [`grammar_test.go`](consts/grammar_test.go) regenerates these on `go test ./...`.
 
@@ -153,12 +181,12 @@ go install github.com/art-media-platform/forge/cmd/forge@latest
 Or run pinned without installing:
 
 ```
-go run github.com/art-media-platform/forge/cmd/forge@v0.1.0 consts ...
+go run github.com/art-media-platform/forge/cmd/forge@v0.2.0 consts ...
 ```
 
 ## CLI
 
-- `forge consts <file.consts.sdl> [--go_out=DIR] [--csharp_out=DIR] [--ts_out=DIR]` — emit Go, C#, and/or TypeScript from a `.consts.sdl` source.
+- `forge consts <file.consts.sdl> [--go_out=DIR] [--csharp_out=DIR] [--ts_out=DIR] [--py_out=DIR]` — emit Go, C#, TypeScript, and/or Python from a `.consts.sdl` source.
 - `forge sdl <in.sdl> <out.sdl>` — parse and re-export an SDL file (round-trip / normalization).
 
 
