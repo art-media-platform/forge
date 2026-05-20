@@ -16,31 +16,31 @@ import (
 // ConstFile is the root AST node for a .consts.sdl file.
 type ConstFile struct {
 	Pos   lexer.Position
-	Decls []*Decl `@@*`
+	Decls []*Decl `parser:"@@*"`
 }
 
 // Decl is a top-level declaration: option, tags block, const group, or const scalar.
 type Decl struct {
 	Pos      lexer.Position
-	Option   *Option     `  @@`
-	Tags     *TagsBlock  `| @@`
-	ConstGrp *ConstGroup `| @@`
-	Const    *ConstDecl  `| @@`
+	Option   *Option     `parser:"  @@"`
+	Tags     *TagsBlock  `parser:"| @@"`
+	ConstGrp *ConstGroup `parser:"| @@"`
+	Const    *ConstDecl  `parser:"| @@"`
 }
 
 // Option is a proto-style file option: option go_package = "...";
 type Option struct {
 	Pos   lexer.Position
-	Name  string `"option" @Ident`
-	Value string `"=" @String ";"`
+	Name  string `parser:"\"option\" @Ident"`
+	Value string `parser:"\"=\" @String \";\""`
 }
 
 // TagsBlock declares a hierarchy of tag name constants.
 // The block name becomes the C# outer class name (e.g. "ID").
 type TagsBlock struct {
 	Pos     lexer.Position
-	Name    string      `"tags" @Ident`
-	Entries []*TagEntry `"{" @@* "}"`
+	Name    string      `parser:"\"tags\" @Ident"`
+	Entries []*TagEntry `parser:"\"{\" @@* \"}\""`
 
 	LeadComment string // populated post-parse by comment extraction
 }
@@ -49,10 +49,10 @@ type TagsBlock struct {
 // All entries emit as tag.Name / TagName; callers use .ID for the bare UID.
 type TagEntry struct {
 	Pos      lexer.Position
-	IsName   bool        `@"name"?`
-	VarName  string      `@Ident`
-	Literal  string      `@String`
-	Children []*TagEntry `( "{" @@* "}" )?`
+	IsName   bool        `parser:"@\"name\"?"`
+	VarName  string      `parser:"@Ident"`
+	Literal  string      `parser:"@String"`
+	Children []*TagEntry `parser:"( \"{\" @@* \"}\" )?"`
 
 	LeadComment  string // populated post-parse (lines above → doc comment)
 	TrailComment string // populated post-parse (same-line → inline comment)
@@ -62,8 +62,8 @@ type TagEntry struct {
 // C# emits as a nested static class; Go prefixes the group name.
 type ConstGroup struct {
 	Pos     lexer.Position
-	Name    string       `"const" @Ident`
-	Members []*ConstDecl `"{" @@* "}"`
+	Name    string       `parser:"\"const\" @Ident"`
+	Members []*ConstDecl `parser:"\"{\" @@* \"}\""`
 
 	LeadComment string // populated post-parse
 }
@@ -72,9 +72,9 @@ type ConstGroup struct {
 // Inside a ConstGroup, the leading "const" keyword is omitted.
 type ConstDecl struct {
 	Pos     lexer.Position
-	Type    string `"const"? @("string" | "int32" | "int64" | "uint32" | "uint64" | "float32" | "float64" | "float" | "double" | "fixed64" | "uid")`
-	VarName string `@Ident`
-	Value   *Value `"=" @@ ";"`
+	Type    string `parser:"\"const\"? @(\"string\" | \"int32\" | \"int64\" | \"uint32\" | \"uint64\" | \"float32\" | \"float64\" | \"float\" | \"double\" | \"fixed64\" | \"uid\")"`
+	VarName string `parser:"@Ident"`
+	Value   *Value `parser:"\"=\" @@ \";\""`
 
 	LeadComment  string // populated post-parse
 	TrailComment string // populated post-parse
@@ -83,18 +83,18 @@ type ConstDecl struct {
 // UIDLit is a UID literal pair: {hex, hex}
 type UIDLit struct {
 	Pos lexer.Position
-	Hi  string `"{" @Hex`
-	Lo  string `"," @Hex "}"`
+	Hi  string `parser:"\"{\" @Hex"`
+	Lo  string `parser:"\",\" @Hex \"}\""`
 }
 
 // Value holds a typed constant value (string, integer, float, hex, or UID pair).
 type Value struct {
 	Pos     lexer.Position
-	UIDPair *UIDLit  `  @@`
-	String  *string  `| @String`
-	Float   *float64 `| @Float`
-	Hex     *string  `| @Hex`
-	Int     *int64   `| @Int`
+	UIDPair *UIDLit  `parser:"  @@"`
+	String  *string  `parser:"| @String"`
+	Float   *float64 `parser:"| @Float"`
+	Hex     *string  `parser:"| @Hex"`
+	Int     *int64   `parser:"| @Int"`
 }
 
 var constParser = participle.MustBuild[ConstFile](
