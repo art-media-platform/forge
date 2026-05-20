@@ -17,6 +17,14 @@ type GenOpts struct {
 	SourceName string // source filename for header comment
 }
 
+// GenTargets selects which language outputs Generate writes and where.
+// An empty directory disables that target.
+type GenTargets struct {
+	GoOut     string // Go output directory
+	CSharpOut string // C# output directory
+	TSOut     string // TypeScript output directory
+}
+
 // resolvedEntry holds pre-computed data for one tag entry output line.
 // All entries are tag.Name — callers use .ID when they need the UID.
 type resolvedEntry struct {
@@ -49,6 +57,20 @@ func buildTagSections(entries []*TagEntry) []tagSection {
 		})
 	}
 	return sections
+}
+
+// sectionIsGroup reports whether a section reads as a visual group worth setting
+// off with a blank line: it carries a header comment or spans a parent entry
+// plus its nested children.  Runs of flat single entries pack together.
+func sectionIsGroup(sec *tagSection) bool {
+	return sec.comment != "" || len(sec.entries) > 1
+}
+
+// blankBetweenSections reports whether a blank line belongs before section idx,
+// given the section list.  The first section never gets a leading blank; later
+// sections get one only when they or their predecessor read as a group.
+func blankBetweenSections(sections []tagSection, idx int) bool {
+	return idx > 0 && (sectionIsGroup(&sections[idx-1]) || sectionIsGroup(&sections[idx]))
 }
 
 // resolveTagEntries recursively flattens tag entries into output lines,
@@ -108,8 +130,8 @@ func emitSectionHeader(buf *strings.Builder, comment, linePrefix string) {
 	}
 }
 
-// Generate parses a .consts.sdl file and writes Go and/or C# output.
-func Generate(inputPath, goOutDir, csharpOutDir string, opts *GenOpts) error {
+// Generate parses a .consts.sdl file and writes output for each enabled target.
+func Generate(inputPath string, out GenTargets, opts *GenOpts) error {
 	src, err := os.ReadFile(inputPath)
 	if err != nil {
 		return fmt.Errorf("reading %s: %w", inputPath, err)
@@ -140,25 +162,37 @@ func Generate(inputPath, goOutDir, csharpOutDir string, opts *GenOpts) error {
 		opts.SourceName = baseName
 	}
 
-	if goOutDir != "" {
-		out, err := GenerateGo(cf, opts)
+	if out.GoOut != "" {
+		src, err := GenerateGo(cf, opts)
 		if err != nil {
 			return fmt.Errorf("generating Go: %w", err)
 		}
-		outPath := filepath.Join(goOutDir, stem+".consts.go")
-		if err := os.WriteFile(outPath, out, 0644); err != nil {
+		outPath := filepath.Join(out.GoOut, stem+".consts.go")
+		if err := os.WriteFile(outPath, src, 0644); err != nil {
 			return fmt.Errorf("writing %s: %w", outPath, err)
 		}
 		fmt.Printf("=> %s\n", outPath)
 	}
 
-	if csharpOutDir != "" {
-		out, err := GenerateCSharp(cf, opts)
+	if out.CSharpOut != "" {
+		src, err := GenerateCSharp(cf, opts)
 		if err != nil {
 			return fmt.Errorf("generating C#: %w", err)
 		}
-		outPath := filepath.Join(csharpOutDir, stem+".consts.cs")
-		if err := os.WriteFile(outPath, out, 0644); err != nil {
+		outPath := filepath.Join(out.CSharpOut, stem+".consts.cs")
+		if err := os.WriteFile(outPath, src, 0644); err != nil {
+			return fmt.Errorf("writing %s: %w", outPath, err)
+		}
+		fmt.Printf("=> %s\n", outPath)
+	}
+
+	if out.TSOut != "" {
+		src, err := GenerateTypeScript(cf, opts)
+		if err != nil {
+			return fmt.Errorf("generating TypeScript: %w", err)
+		}
+		outPath := filepath.Join(out.TSOut, stem+".consts.ts")
+		if err := os.WriteFile(outPath, src, 0644); err != nil {
 			return fmt.Errorf("writing %s: %w", outPath, err)
 		}
 		fmt.Printf("=> %s\n", outPath)

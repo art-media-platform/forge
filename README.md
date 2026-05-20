@@ -1,6 +1,6 @@
 # forge
 
-A codegen tool for **cross-language string and numerical constants** — the kind that need to stay byte-identical between Go, C#, and other languages, with deterministic IDs that never drift across rebuilds.  PRs for other languages happily accepted.
+A codegen tool for **cross-language string and numerical constants** — the kind that need to stay byte-identical between Go, C#, TypeScript, and other languages, with deterministic IDs that never drift across rebuilds.  PRs for other languages happily accepted.
 
 ## The Problem
 
@@ -27,10 +27,7 @@ One `.sdl` source file, multiple language outputs. IDs computed once at codegen 
 
 // Stable, named identifiers — names get hashed to UIDs at codegen time.
 tags ID {
-    HomeWebSite   "https://banana-stand.com"
-    WindowsHosts  "C:\\Windows\\System32\\drivers\\etc\\hosts"
-    KnownHosts    "file:{$HOME}.ssh/id_rsa"
-    SiteDownloads "http://acme.enlargements.com/downloads/index.html"
+    SiteDownloads "http://acme.enlargements.com/downloads/"
     TestNet       "your-scheme://server.com:23382/path"
     BestShow      "Fraggle Rock"
 }
@@ -49,24 +46,18 @@ Run:
 
 ```
 go run github.com/art-media-platform/forge/cmd/forge@latest consts your-project.consts.sdl \
-    --go_out=./go --csharp_out=./csharp
+    --go_out=./go --csharp_out=./csharp --ts_out=./ts
 ```
 
 Generated **Go**:
 
 ```go
 var ID = struct {
-    HomeWebSite   tag.Name
-    WindowsHosts  tag.Name
-    KnownHosts    tag.Name
     SiteDownloads tag.Name
     TestNet       tag.Name
     BestShow      tag.Name
 }{
-    HomeWebSite  : tag.Name{ID: tag.UID{0x5BD..., 0x0C8...}, Canonic: "https://banana-stand.com"},
-    WindowsHosts : tag.Name{ID: tag.UID{0x0C6..., 0x713...}, Canonic: "c:\\Windows\\System32\\drivers\\etc\\hosts"},
-    KnownHosts   : tag.Name{ID: tag.UID{0xD19..., 0xBF4...}, Canonic: "file:{$HOME}.ssh/id_rsa"},
-    SiteDownloads: tag.Name{ID: tag.UID{0x868..., 0x7F4...}, Canonic: "http://acme.enlargements.com/downloads/index.html"},
+    SiteDownloads: tag.Name{ID: tag.UID{0xFA5..., 0x382...}, Canonic: "http://acme.enlargements.com/downloads/"},
     TestNet      : tag.Name{ID: tag.UID{0x464..., 0xDC3...}, Canonic: "your-scheme://server.com:23382/path"},
     BestShow     : tag.Name{ID: tag.UID{0x57B..., 0x78F...}, Canonic: "fraggle.rock"},
 }
@@ -86,10 +77,7 @@ Generated **C#**:
 
 ```cs
 public static partial class ID {
-    public static readonly TagName HomeWebSite   = new(new(0x5BD..., 0x0C8...), "https://banana-stand.com");
-    public static readonly TagName WindowsHosts  = new(new(0x0C6..., 0x713...), "c:\\Windows\\System32\\drivers\\etc\\hosts");
-    public static readonly TagName KnownHosts    = new(new(0xD19..., 0xBF4...), "file:{$HOME}.ssh/id_rsa");
-    public static readonly TagName SiteDownloads = new(new(0x868..., 0x7F4...), "http://acme.enlargements.com/downloads/index.html");
+    public static readonly TagName SiteDownloads = new(new(0xFA5..., 0x382...), "http://acme.enlargements.com/downloads/");
     public static readonly TagName TestNet       = new(new(0x464..., 0xDC3...), "your-scheme://server.com:23382/path");
     public static readonly TagName BestShow      = new(new(0x57B..., 0x78F...), "fraggle.rock");
 }
@@ -100,11 +88,34 @@ public static readonly string SDKVersion      = "2026.05.18";
 public static readonly ulong  MaxItemsPerPage = 1000UL;
 ```
 
+Generated **TypeScript** — zero runtime, self-contained types, `bigint` literals so 64-bit values never lose precision:
+
+```ts
+export type UID = readonly [bigint, bigint];
+
+export interface TagName {
+    readonly id:      UID;
+    readonly canonic: string;
+}
+
+export const ID = {
+    SiteDownloads: { id: [0xFA5...n, 0x382...n], canonic: "http://acme.enlargements.com/downloads/" },
+    TestNet      : { id: [0x464...n, 0xDC3...n], canonic: "your-scheme://server.com:23382/path" },
+    BestShow     : { id: [0x57B...n, 0x78F...n], canonic: "fraggle.rock" },
+} satisfies Record<string, TagName>;
+
+export const VendorAPIKey: UID = [0x550...n, 0xA71...n];
+
+export const APIVersion:      string = "v3.1.0";
+export const SDKVersion:      string = "2026.05.18";
+export const MaxItemsPerPage: bigint = 1000n;
+```
+
 Notice the `Canonic` field: forge normalizes each name before hashing — URLs and file paths keep their structure (scheme lowercased per RFC 3986), while plain text folds spaces and capitalization to a dotted form (`"Fraggle Rock"` → `"fraggle.rock"`). Equivalent spellings collapse to the same UID (full rules in the [`tag.UID`](#taguid) section below).
 
 ## `tag.UID`
 
-The 128-bit identifier in the Go output (two `uint64`s) comes from the [`stdlib/tag`](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md) package of [amp.SDK](https://github.com/art-media-platform/amp.SDK) — a phonetic, search-friendly addressing system worth reading about in its own right. Three things matter to forge users specifically:
+The 128-bit identifier (two `uint64` in Go and C#, a `readonly [bigint, bigint]` tuple in TypeScript) comes from the [`stdlib/tag`](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md) package of [amp.SDK](https://github.com/art-media-platform/amp.SDK) — a phonetic, search-friendly addressing system worth reading about in its own right. Three things matter to forge users specifically:
 
 - **Resilient short label** — `id.Base32()` gives a compact, human-safe string (no look-alike characters). Forge embeds it as a trailing comment on every generated line, so the readable label always sits beside the binary value.
 - **Lightweight** — two 64-bit integers, no heap allocation. Fast: compare with `==`, use as a map key, or pass by value.
@@ -118,9 +129,10 @@ The repo's golden test exercises every grammar feature — tag hierarchies, UUID
 
 | File | Role |
 |---|---|
-| [`grammar_test.sdl`](consts/golden/grammar_test.sdl) | input source |
+| [`grammar_test.sdl`](consts/golden/grammar_test.sdl) | input |
 | [`grammar_test.consts.go`](consts/golden/grammar_test.consts.go) | generated Go |
 | [`grammar_test.consts.cs`](consts/golden/grammar_test.consts.cs) | generated C# |
+| [`grammar_test.consts.ts`](consts/golden/grammar_test.consts.ts) | generated TypeScript |
 
 [`grammar_test.go`](consts/grammar_test.go) regenerates these on `go test ./...`.
 
@@ -146,13 +158,9 @@ go run github.com/art-media-platform/forge/cmd/forge@v0.1.0 consts ...
 
 ## CLI
 
-- `forge consts <file.consts.sdl> [--go_out=DIR] [--csharp_out=DIR]` — emit Go and/or C# from a `.consts.sdl` source.
+- `forge consts <file.consts.sdl> [--go_out=DIR] [--csharp_out=DIR] [--ts_out=DIR]` — emit Go, C#, and/or TypeScript from a `.consts.sdl` source.
 - `forge sdl <in.sdl> <out.sdl>` — parse and re-export an SDL file (round-trip / normalization).
 
-## Packages
-
-- `consts/` — `.consts.sdl` grammar, AST, Go/C# emitters.
-- `sdl/` — SDL grammar, AST, export.
 
 ## Powered by Participle
 

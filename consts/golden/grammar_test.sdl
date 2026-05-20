@@ -33,12 +33,10 @@ tags Name {
     }
 }
 
+
 // README example
 tags ID {
-    HomeWebSite   "https://banana-stand.com"
-    WindowsHosts  "C:\\Windows\\System32\\drivers\\etc\\hosts"
-    KnownHosts    "file:{$HOME}.ssh/id_rsa"
-    SiteDownloads "http://acme.enlargements.com/downloads/index.html"
+    SiteDownloads "http://acme.enlargements.com/downloads/"
     TestNet       "your-scheme://server.com:23382/path"
     BestShow      "Fraggle Rock"
 }
@@ -68,6 +66,14 @@ const uint64 HexConst        = 0xFFFFFFFFFFFFFFF0;
 const float64 Pi             = 3.14159265358979;
 const float32 SmallPi        = 3.14;
 const double  TwoPi          = 3.14159265358979;
+
+
+const SomeFiles {
+    string WindowsHosts  = "C:\\Windows\\System32\\drivers\\etc\\hosts";
+    string UnixHosts     = "/etc/hosts";
+    string MacHosts      = "/private/etc/hosts";
+}
+
 
 const Moar {
     uint64 MaxFraction     = 1000000000;

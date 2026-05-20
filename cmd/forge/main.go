@@ -17,17 +17,22 @@ func main() {
 
 var CLI struct {
 	SDL    FilterSDL `cmd:"" help:"Process SDL files."`
-	Consts ConstsGen `cmd:"" help:"Generate Go/C# from .consts.sdl files."`
+	Consts ConstsGen `cmd:"" help:"Generate Go/C#/TypeScript from .consts.sdl files."`
 }
 
 type ConstsGen struct {
 	FileIn    string `arg:"" name:"file" type:"existingfile" help:".consts.sdl source file"`
-	GoOut     string `name:"go_out"      help:"Go output directory"     optional:""`
-	CSharpOut string `name:"csharp_out"  help:"C# output directory"     optional:""`
+	GoOut     string `name:"go_out"      help:"Go output directory"         optional:""`
+	CSharpOut string `name:"csharp_out"  help:"C# output directory"         optional:""`
+	TSOut     string `name:"ts_out"      help:"TypeScript output directory" optional:""`
 }
 
 func (cmd *ConstsGen) Run() error {
-	return consts.Generate(cmd.FileIn, cmd.GoOut, cmd.CSharpOut, nil)
+	return consts.Generate(cmd.FileIn, consts.GenTargets{
+		GoOut:     cmd.GoOut,
+		CSharpOut: cmd.CSharpOut,
+		TSOut:     cmd.TSOut,
+	}, nil)
 }
 
 type FilterSDL struct {

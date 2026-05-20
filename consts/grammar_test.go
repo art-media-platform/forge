@@ -6,9 +6,9 @@ import (
 	"testing"
 )
 
-// TestGolden regenerates Go and C# output from the golden .consts.sdl input
-// and writes the results alongside it. A developer reviews any diff against
-// what's committed to verify correctness.
+// TestGolden regenerates Go, C#, and TypeScript output from the golden
+// .consts.sdl input and writes the results alongside it. A developer reviews
+// any diff against what's committed to verify correctness.
 //
 // To accept changes after an intentional edit: commit the updated golden files.
 func TestGolden(t *testing.T) {
@@ -46,6 +46,14 @@ func TestGolden(t *testing.T) {
 		t.Fatalf("GenerateCSharp: %v", err)
 	}
 	if err := os.WriteFile(filepath.Join(goldenDir, "grammar_test.consts.cs"), csOut, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	tsOut, err := GenerateTypeScript(cf, opts)
+	if err != nil {
+		t.Fatalf("GenerateTypeScript: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(goldenDir, "grammar_test.consts.ts"), tsOut, 0644); err != nil {
 		t.Fatal(err)
 	}
 }
