@@ -137,11 +137,19 @@ Notice the `Canonic` field: forge normalizes each name before hashing — URLs a
 
 ## `tag.UID`
 
-The 128-bit identifier (two `uint64` in Go and C#, a `readonly [bigint, bigint]` tuple in TypeScript) comes from the [`stdlib/tag`](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md) package of [amp.SDK](https://github.com/art-media-platform/amp.SDK) — a phonetic, search-friendly addressing system worth reading about in its own right. Three things matter to forge users specifically:
+Every name compiles to a 128-bit identifier from the [`stdlib/tag`](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md) package of [amp.SDK](https://github.com/art-media-platform/amp.SDK) — a phonetic, search-friendly addressing system worth reading about in its own right. Forge emits it as two 64-bit halves, idiomatically per language:
 
-- **Resilient short label** — `id.Base32()` gives a compact, human-safe string (no look-alike characters). Forge embeds it as a trailing comment on every generated line, so the readable label always sits beside the binary value.
-- **Lightweight** — two 64-bit integers, no heap allocation. Fast: compare with `==`, use as a map key, or pass by value.
-- **No runtime parsing liability** — the value is already a literal in your generated code; forge did the parsing at codegen time. Your binary never parses a UUID string at startup unless *you* hand it one — no startup hashing, no parse-error branch, no cross-language library-version skew.
+| Language | `UID` | `TagName` |
+|---|---|---|
+| Go | `tag.UID` (two `uint64`) | `tag.Name` |
+| C# | `UID` (two `ulong`) | `TagName` |
+| TypeScript | `readonly [bigint, bigint]` | `TagName` (interface) |
+| Python | `tuple[int, int]` | `TagName` (NamedTuple) |
+
+Go and C# reference these types from amp.SDK; TypeScript and Python have no tag runtime, so forge emits self-contained `UID` and `TagName` definitions inline. Either way, three things matter to forge users:
+
+- **Resilient short label** — `id.Base32()` gives a compact, human-safe string with no look-alike characters. Forge embeds it as a trailing comment on every generated line, so the readable label always sits beside the binary value.
+- **No runtime parsing liability** — the value is already a literal in your generated code; forge parsed it at codegen time. Your binary never parses a UUID string at startup unless *you* hand it one — no startup hashing, no parse-error branch, no cross-language library-version skew.
 
 For the canonicalization rules (URL-mode parsing, acronym preservation, homophone folding, edit-chain arithmetic) and the Base32 alphabet rationale, see the [`tag` package README](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md).
 
