@@ -33,6 +33,16 @@ tags Name {
     }
 }
 
+// README example
+tags ID {
+    HomeWebSite   "https://banana-stand.com"
+    WindowsHosts  "C:\\Windows\\System32\\drivers\\etc\\hosts"
+    KnownHosts    "file:{$HOME}.ssh/id_rsa"
+    SiteDownloads "http://acme.enlargements.com/downloads/index.html"
+    TestNet       "your-scheme://server.com:23382/path"
+    BestShow      "Fraggle Rock"
+}
+
 // Bootstrapping node ID
 const uid TestingID = {0x7, 0x8};
 

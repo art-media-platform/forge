@@ -24,6 +24,22 @@ namespace art.media.platform.std {
 
     }
 
+    public static partial class ID {
+
+        public static readonly TagName HomeWebSite = new(new(0x5BD0C09BE74593E5, 0x0C8059DE0A9D0D50), "https://banana-stand.com");  // 2VU309RTU5KGKHT02TVS59U3BH
+
+        public static readonly TagName WindowsHosts = new(new(0x0C60D6FB30DBF09A, 0x713273FE8FA62A1B), "c:\\Windows\\System32\\drivers\\etc\\hosts");  // 0DD3CGQD6VY2E72DMMZU7UDBHV
+
+        public static readonly TagName KnownHosts = new(new(0xD19FC4D54C2527B0, 0xBF4C697F50B816EC), "file:{$HOME}.ssh/id_rsa");  // 6JMZ2EBM154YSCYM39GX8CH5RD
+
+        public static readonly TagName SiteDownloads = new(new(0x868D828288C7C420, 0x7F486F7861B829C6), "http://acme.enlargements.com/downloads/index.html");  // 46JQ185267SHH7YK3GG1HVHBF6
+
+        public static readonly TagName TestNet = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 2681ZFCW558ERXSF1Y0S0Y6F3B
+
+        public static readonly TagName BestShow = new(new(0x57B2E51533698C3F, 0x78FFA34D801D6675), "fraggle.rock");  // 2RQCKJBDV9JHZRJZX39Q01UTMP
+
+    }
+
     public static partial class Moar {
         public static readonly ulong  MaxFraction = 1000000000UL;
         public static readonly double TwoPi       = 3.14159265358979;
