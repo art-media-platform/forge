@@ -37,7 +37,7 @@ var ID = struct {
 	TestNet       tag.Name
 	BestShow      tag.Name
 }{
-	SiteDownloads: tag.Name{ID: tag.UID{0xFA5633BD0202D0E8, 0x382B9F0FC9EDD9E2}, Canonic: "http://acme.enlargements.com/downloads/"},  // 7UBSTVU0H2U3N3HBWZ1Z4YVQG2
+	SiteDownloads: tag.Name{ID: tag.UID{0xB30A33823CA36F9E, 0x379DE2617633209C}, Canonic: "http://acme.com/downloads/"},  // 5M18TS4G53EYG3G7G2D5V3684W
 	TestNet      : tag.Name{ID: tag.UID{0x46407EE5F0A5436F, 0xDC383E0601E3386A}, Canonic: "your-scheme://server.com:23382/path"},  // 2681ZFCW558ERXSF1Y0S0Y6F3B
 	BestShow     : tag.Name{ID: tag.UID{0x57B2E51533698C3F, 0x78FFA34D801D6675}, Canonic: "fraggle.rock"},  // 2RQCKJBDV9JHZRJZX39Q01UTMP
 }

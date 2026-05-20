@@ -28,7 +28,7 @@ export const Name = {
 } satisfies Record<string, TagName>;
 
 export const ID = {
-    SiteDownloads: { id: [0xFA5633BD0202D0E8n, 0x382B9F0FC9EDD9E2n], canonic: "http://acme.enlargements.com/downloads/" },  // 7UBSTVU0H2U3N3HBWZ1Z4YVQG2
+    SiteDownloads: { id: [0xB30A33823CA36F9En, 0x379DE2617633209Cn], canonic: "http://acme.com/downloads/" },  // 5M18TS4G53EYG3G7G2D5V3684W
     TestNet      : { id: [0x46407EE5F0A5436Fn, 0xDC383E0601E3386An], canonic: "your-scheme://server.com:23382/path" },  // 2681ZFCW558ERXSF1Y0S0Y6F3B
     BestShow     : { id: [0x57B2E51533698C3Fn, 0x78FFA34D801D6675n], canonic: "fraggle.rock" },  // 2RQCKJBDV9JHZRJZX39Q01UTMP
 } satisfies Record<string, TagName>;

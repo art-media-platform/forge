@@ -27,7 +27,7 @@ One `.sdl` source file, multiple language outputs. IDs computed once at codegen 
 
 // Stable, named identifiers — names get hashed to UIDs at codegen time.
 tags ID {
-    SiteDownloads "http://acme.enlargements.com/downloads/"
+    SiteDownloads "http://acme.com/downloads/"
     TestNet       "your-scheme://server.com:23382/path"
     BestShow      "Fraggle Rock"
 }
@@ -38,7 +38,6 @@ const uid VendorAPIKey = "550e8400-e29b-41d4-a716-446655440000";
 
 // Plain scalar constants.
 const string APIVersion      = "v3.1.0";
-const string SDKVersion      = "2026.05.18";
 const uint64 MaxItemsPerPage = 1000;
 ```
 
@@ -57,7 +56,7 @@ var ID = struct {
     TestNet       tag.Name
     BestShow      tag.Name
 }{
-    SiteDownloads: tag.Name{ID: tag.UID{0xFA5..., 0x382...}, Canonic: "http://acme.enlargements.com/downloads/"},
+    SiteDownloads: tag.Name{ID: tag.UID{0xB30..., 0x379...}, Canonic: "http://acme.com/downloads/"},
     TestNet      : tag.Name{ID: tag.UID{0x464..., 0xDC3...}, Canonic: "your-scheme://server.com:23382/path"},
     BestShow     : tag.Name{ID: tag.UID{0x57B..., 0x78F...}, Canonic: "fraggle.rock"},
 }
@@ -68,7 +67,6 @@ var (
 
 const (
     APIVersion      = "v3.1.0"
-    SDKVersion      = "2026.05.18"
     MaxItemsPerPage = uint64(1000)
 )
 ```
@@ -77,14 +75,13 @@ Generated **C#**:
 
 ```cs
 public static partial class ID {
-    public static readonly TagName SiteDownloads = new(new(0xFA5..., 0x382...), "http://acme.enlargements.com/downloads/");
+    public static readonly TagName SiteDownloads = new(new(0xB30..., 0x379...), "http://acme.com/downloads/");
     public static readonly TagName TestNet       = new(new(0x464..., 0xDC3...), "your-scheme://server.com:23382/path");
     public static readonly TagName BestShow      = new(new(0x57B..., 0x78F...), "fraggle.rock");
 }
 
 public static readonly UID    VendorAPIKey    = new(0x550..., 0xA71...);
 public static readonly string APIVersion      = "v3.1.0";
-public static readonly string SDKVersion      = "2026.05.18";
 public static readonly ulong  MaxItemsPerPage = 1000UL;
 ```
 
@@ -99,7 +96,7 @@ export interface TagName {
 }
 
 export const ID = {
-    SiteDownloads: { id: [0xFA5...n, 0x382...n], canonic: "http://acme.enlargements.com/downloads/" },
+    SiteDownloads: { id: [0xB30...n, 0x379...n], canonic: "http://acme.com/downloads/" },
     TestNet      : { id: [0x464...n, 0xDC3...n], canonic: "your-scheme://server.com:23382/path" },
     BestShow     : { id: [0x57B...n, 0x78F...n], canonic: "fraggle.rock" },
 } satisfies Record<string, TagName>;
@@ -107,7 +104,6 @@ export const ID = {
 export const VendorAPIKey: UID = [0x550...n, 0xA71...n];
 
 export const APIVersion:      string = "v3.1.0";
-export const SDKVersion:      string = "2026.05.18";
 export const MaxItemsPerPage: bigint = 1000n;
 ```
 
@@ -134,7 +130,6 @@ VendorAPIKey: UID = (0x550..., 0xA71...)
 
 
 APIVersion:      str = "v3.1.0"
-SDKVersion:      str = "2026.05.18"
 MaxItemsPerPage: int = 1000
 ```
 

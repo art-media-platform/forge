@@ -36,7 +36,7 @@ tags Name {
 
 // README example
 tags ID {
-    SiteDownloads "http://acme.enlargements.com/downloads/"
+    SiteDownloads "http://acme.com/downloads/"
     TestNet       "your-scheme://server.com:23382/path"
     BestShow      "Fraggle Rock"
 }
