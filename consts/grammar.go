@@ -1,5 +1,5 @@
-// Package constgen parses .consts.sdl files and generates Go, C#, and (future) C
-// constant definitions from a single source of truth.
+// Package consts parses .consts.sdl files and generates Go, C#, TypeScript,
+// Python, and C constant definitions from a single source of truth.
 //
 // The .consts.sdl format is a proto3-inspired DSL for declaring hierarchical tag
 // names and scalar constants that compile to multiple languages.

@@ -16,20 +16,20 @@ var Name = struct {
 	ReallySuperLongName tag.Name
 }{
 	// ─── This is a big fancy comment, ───────────────────────────────
-	AppTag             : tag.Name{ID: tag.UID{0x9FC2012FD63F847A, 0x51AA55A31D90CD25}, Canonic: "app"},        // 4ZS80KZPJZHJX53BKPNDFT1M95
+	AppTag: tag.Name{ID: tag.UID{0x9FC2012FD63F847A, 0x51AA55A31D90CD25}, Canonic: "app"}, // 4ZS80KZPJZHJX53BKPNDFT1M95
 
-	AppState           : tag.Name{ID: tag.UID{0xB0E0A1DFE9CF1CE2, 0x6D372EA4CD284F8D}, Canonic: "app.state"},  // 5HW2HXZUFG3MJ6UETFNM6KHMWE
+	AppState: tag.Name{ID: tag.UID{0xB0E0A1DFE9CF1CE2, 0x6D372EA4CD284F8D}, Canonic: "app.state"}, // 5HW2HXZUFG3MJ6UETFNM6KHMWE
 
 	// ─── This is a very descriptive comment ─────────────────────────
 	// that spans multiple lines to exercise
 	// the multi-line doc-comment code path.
-	SessionAttr        : tag.Name{ID: tag.UID{0x5948CA6969CBDF2F, 0x01C92A44FA60AB24}, Canonic: "session"},                          // 2T9356KUFCVWRH3K9B8MX61BT4
+	SessionAttr: tag.Name{ID: tag.UID{0x5948CA6969CBDF2F, 0x01C92A44FA60AB24}, Canonic: "session"}, // 2T9356KUFCVWRH3K9B8MX61BT4
 
-	LoginID            : tag.Name{ID: tag.UID{0xCC1664C727510447, 0xFBE5F2B6BC492F9D}, Canonic: "session.login"},                    // 6D2TKDF9UJ0J3ZRTGKQUY4KCWX
-	SessionTag         : tag.Name{ID: tag.UID{0x0F2E0253AA120335, 0x4355B536D92A8B5A}, Canonic: "session.tag"},                      // 0G5S157BHK0DUN6PEP6VDKP2UU
+	LoginID:    tag.Name{ID: tag.UID{0xCC1664C727510447, 0xFBE5F2B6BC492F9D}, Canonic: "session.login"}, // 6D2TKDF9UJ0J3ZRTGKQUY4KCWX
+	SessionTag: tag.Name{ID: tag.UID{0x0F2E0253AA120335, 0x4355B536D92A8B5A}, Canonic: "session.tag"},   // 0G5S157BHK0DUN6PEP6VDKP2UU
 
-	LaunchWeb          : tag.Name{ID: tag.UID{0x972CEB01661BA7F5, 0xC8E19B9BC9291F22}, Canonic: "session.tag.www"},                  // 4R5MPH2THVNZUWJSDVMG4KK7T2
-	ReallySuperLongName: tag.Name{ID: tag.UID{0xAC9496188C89AB63, 0xF81E6F8687799949}, Canonic: "session.tag.reallysuperlongname"},  // 5DKKC1J349PEJZH7MGHU3RM6B9
+	LaunchWeb:           tag.Name{ID: tag.UID{0x972CEB01661BA7F5, 0xC8E19B9BC9291F22}, Canonic: "session.tag.www"},                 // 4R5MPH2THVNZUWJSDVMG4KK7T2
+	ReallySuperLongName: tag.Name{ID: tag.UID{0xAC9496188C89AB63, 0xF81E6F8687799949}, Canonic: "session.tag.reallysuperlongname"}, // 5DKKC1J349PEJZH7MGHU3RM6B9
 }
 
 var ID = struct {
@@ -37,14 +37,14 @@ var ID = struct {
 	TestNet       tag.Name
 	BestShow      tag.Name
 }{
-	SiteDownloads: tag.Name{ID: tag.UID{0xB30A33823CA36F9E, 0x379DE2617633209C}, Canonic: "http://acme.com/downloads/"},  // 5M18TS4G53EYG3G7G2D5V3684W
-	TestNet      : tag.Name{ID: tag.UID{0x46407EE5F0A5436F, 0xDC383E0601E3386A}, Canonic: "your-scheme://server.com:23382/path"},  // 2681ZFCW558ERXSF1Y0S0Y6F3B
-	BestShow     : tag.Name{ID: tag.UID{0x57B2E51533698C3F, 0x78FFA34D801D6675}, Canonic: "fraggle.rock"},  // 2RQCKJBDV9JHZRJZX39Q01UTMP
+	SiteDownloads: tag.Name{ID: tag.UID{0xB30A33823CA36F9E, 0x379DE2617633209C}, Canonic: "http://acme.com/downloads/"},          // 5M18TS4G53EYG3G7G2D5V3684W
+	TestNet:       tag.Name{ID: tag.UID{0x46407EE5F0A5436F, 0xDC383E0601E3386A}, Canonic: "your-scheme://server.com:23382/path"}, // 2681ZFCW558ERXSF1Y0S0Y6F3B
+	BestShow:      tag.Name{ID: tag.UID{0x57B2E51533698C3F, 0x78FFA34D801D6675}, Canonic: "fraggle.rock"},                        // 2RQCKJBDV9JHZRJZX39Q01UTMP
 }
 
 var (
 	// Bootstrapping node ID
-	TestingID      = tag.UID{0x7, 0x8}
+	TestingID = tag.UID{0x7, 0x8}
 	// UUID literals — every form accepted by gofrs/uuid.FromString is normalized
 	// to the same {hi, lo} hex-pair output.  Same UUID, six syntactic spellings:
 	UUID_Canonical = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
@@ -54,10 +54,10 @@ var (
 	UUID_URN       = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
 	UUID_MixedCase = tag.UID{0x550E8400E29B41D4, 0xA716446655440000}
 	// Sentinel UUIDs that downstream callers occasionally need to express.
-	UUID_Nil       = tag.UID{0x0000000000000000, 0x0000000000000000}
-	UUID_Max       = tag.UID{0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF}
+	UUID_Nil = tag.UID{0x0000000000000000, 0x0000000000000000}
+	UUID_Max = tag.UID{0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF}
 	// A distinct UUID, to confirm the parser disambiguates between sources.
-	HiMom          = tag.UID{0x6BA7B8109DAD11D1, 0x80B400C04FD430C8}
+	HiMom = tag.UID{0x6BA7B8109DAD11D1, 0x80B400C04FD430C8}
 )
 
 const (

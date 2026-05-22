@@ -2,7 +2,6 @@ package consts
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -25,59 +24,40 @@ func GenerateCSharp(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 		buf.WriteString("//\n")
 		buf.WriteString("//   source: " + opts.SourceName + "\n")
 	}
-	buf.WriteString("\nnamespace " + ns + " {\n")
+	// File-scoped namespace (C# 10+): no wrapping braces, no extra indent.
+	buf.WriteString("\nnamespace " + ns + ";\n")
 
-	// First pass: collect all declarations by category
-	var tagsBlocks []*TagsBlock
-	var topScalars []*ConstDecl
-	var uidConsts []*ConstDecl
-	var groups []*ConstGroup
-	for _, decl := range cf.Decls {
-		switch {
-		case decl.Tags != nil:
-			tagsBlocks = append(tagsBlocks, decl.Tags)
-		case decl.Const != nil:
-			if decl.Const.Type == "uid" {
-				uidConsts = append(uidConsts, decl.Const)
-			} else {
-				topScalars = append(topScalars, decl.Const)
-			}
-		case decl.ConstGrp != nil:
-			groups = append(groups, decl.ConstGrp)
-		}
-	}
+	ds := categorize(cf)
 
 	// Emit tags blocks — do NOT fold in top-level UIDs.  Each tags block is a
 	// pure tag.Name namespace; UIDs get their own home in the Const class or
 	// in whatever ConstGroup they were declared in.
-	for _, tb := range tagsBlocks {
-		emitCSharpTagsBlock(&buf, tb, "    ")
+	for _, tb := range ds.Tags {
+		emitCSharpTagsBlock(&buf, tb)
 	}
 
-	// Emit grouped constants (scalars + UIDs coexist as public static readonly).
-	for _, grp := range groups {
-		emitCSharpConstClass(&buf, grp.Name, grp.Members, grp.LeadComment, "    ")
+	// Emit grouped constants (scalars + UIDs coexist as public members).
+	for _, grp := range ds.Groups {
+		emitCSharpConstClass(&buf, grp.Name, grp.Members, grp.LeadComment)
 	}
 
 	// Merge top-level scalars and top-level UIDs into a single "Const" class.
 	// No section-header hoist from the first member's comment — per-member
 	// doc comments stay inline alongside each field.
-	topMembers := append([]*ConstDecl{}, topScalars...)
-	topMembers = append(topMembers, uidConsts...)
+	topMembers := append([]*ConstDecl{}, ds.Scalars...)
+	topMembers = append(topMembers, ds.UIDs...)
 	if len(topMembers) > 0 {
-		emitCSharpConstClass(&buf, "Const", topMembers, "", "    ")
+		emitCSharpConstClass(&buf, "Const", topMembers, "")
 	}
 
-	buf.WriteString("\n}\n")
 	return []byte(buf.String()), nil
 }
 
-// emitCSharpTagsBlock emits the outer partial class wrapping all tag entries.
+// emitCSharpTagsBlock emits the partial class wrapping all tag entries.
 // UIDs declared at file scope do NOT fold in here; they belong in their own
 // namespace (Const class or their ConstGroup's class).
-func emitCSharpTagsBlock(buf *strings.Builder, tb *TagsBlock, indent string) {
-	buf.WriteString("\n")
-	buf.WriteString(indent + "public static partial class " + tb.Name + " {\n")
+func emitCSharpTagsBlock(buf *strings.Builder, tb *TagsBlock) {
+	buf.WriteString("\npublic static partial class " + tb.Name + " {\n")
 
 	sections := buildTagSections(tb.Entries)
 
@@ -95,51 +75,44 @@ func emitCSharpTagsBlock(buf *strings.Builder, tb *TagsBlock, indent string) {
 		if blankBetweenSections(sections, i) {
 			buf.WriteString("\n")
 		}
-		emitCSharpTagSection(buf, &sections[i], indent+"    ", maxVar)
+		emitCSharpTagSection(buf, &sections[i], maxVar)
 	}
 
-	buf.WriteString(indent + "}\n")
+	buf.WriteString("}\n")
 }
 
 // emitCSharpTagSection writes one alignment group of C# tag entries.
 // maxVar is the block-global var name width so flat sections align together.
-func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, indent string, maxVar int) {
+func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 	if len(sec.entries) == 0 {
 		return
 	}
+
+	const indent = "    "
 
 	// Section divider
 	if sec.comment != "" {
 		emitSectionHeader(buf, sec.comment, indent+"// ")
 	}
 
-	// First pass: build expressions and measure code column width
+	// Tag entries are always `static readonly TagName` (a struct ctor is not a
+	// compile-time constant, so they can't be `const`).
+	expr := func(entry *resolvedEntry) string {
+		return "public static readonly TagName " + padRight(entry.varName, maxVar) + " = " + csTagExpr(entry) + ";"
+	}
+
+	// First pass: measure code column width for trailing-comment alignment
 	maxCode := 0
-
-	type csLine struct {
-		expr   string // includes trailing ";"
-		base32 string
-	}
-
-	lines := make([]csLine, len(sec.entries))
-	for i, entry := range sec.entries {
-		lines[i] = csLine{
-			expr:   csTagExpr(&entry) + ";",
-			base32: entry.base32,
-		}
-	}
-
-	for i, entry := range sec.entries {
-		varPad := strings.Repeat(" ", maxVar-len(entry.varName))
-		code := "public static readonly TagName " + entry.varName + varPad + " = " + lines[i].expr
-		if n := len(code); n > maxCode {
+	for i := range sec.entries {
+		if n := len(expr(&sec.entries[i])); n > maxCode {
 			maxCode = n
 		}
 	}
 
-	// Emit aligned entries
-	for i, entry := range sec.entries {
-		cl := lines[i]
+	// Second pass: emit aligned entries (canonic is in the literal; the trailing
+	// comment is just Base32)
+	for i := range sec.entries {
+		entry := &sec.entries[i]
 
 		if entry.leadComment != "" && entry.leadComment != sec.comment {
 			for _, line := range strings.Split(entry.leadComment, "\n") {
@@ -147,11 +120,7 @@ func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, indent string, 
 			}
 		}
 
-		varPad := strings.Repeat(" ", maxVar-len(entry.varName))
-		code := "public static readonly TagName " + entry.varName + varPad + " = " + cl.expr
-		codePad := strings.Repeat(" ", maxCode-len(code))
-
-		buf.WriteString(indent + code + codePad + "  // " + cl.base32 + "\n")
+		buf.WriteString(indent + padRight(expr(entry), maxCode) + "  // " + entry.base32 + "\n")
 
 		if entry.isParent {
 			buf.WriteString("\n")
@@ -161,57 +130,51 @@ func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, indent string, 
 
 // csTagExpr builds the C# TagName expression for a tag entry.
 func csTagExpr(entry *resolvedEntry) string {
-	return fmt.Sprintf("new(new(0x%016X, 0x%016X), %q)", entry.uidHi, entry.uidLo, entry.canonic)
+	return fmt.Sprintf("new(new(0x%016X, 0x%016X), %s)", entry.uidHi, entry.uidLo, csharpQuote(entry.canonic))
 }
 
-// emitCSharpConstClass writes a partial class of scalar constants.
-func emitCSharpConstClass(buf *strings.Builder, className string, decls []*ConstDecl, sectionComment string, indent string) {
+// emitCSharpConstClass writes a partial class of scalar / UID constants.
+// Compile-time scalars emit as `public const`; UIDs (a struct ctor, not a
+// constant expression) emit as `public static readonly`.  When both kinds
+// appear in one class the modifier forms a column of its own so the type and
+// name columns still line up.
+func emitCSharpConstClass(buf *strings.Builder, className string, decls []*ConstDecl, sectionComment string) {
 	if len(decls) == 0 {
 		return
 	}
 
+	const inner = "    "
+
 	buf.WriteString("\n")
 	if sectionComment != "" {
-		emitSectionHeader(buf, sectionComment, indent+"// ")
+		emitSectionHeader(buf, sectionComment, "// ")
 	}
-	buf.WriteString(indent + "public static partial class " + className + " {\n")
+	buf.WriteString("public static partial class " + className + " {\n")
 
-	inner := indent + "    "
-
-	// Measure type and var name widths for alignment
-	maxType := 0
-	maxVar := 0
+	// Measure modifier, type, and var-name widths for alignment.
+	maxMod, maxType, maxVar := 0, 0, 0
 	for _, member := range decls {
-		csType := csharpType(member.Type)
-		if n := len(csType); n > maxType {
-			maxType = n
-		}
-		if n := len(member.VarName); n > maxVar {
-			maxVar = n
-		}
+		maxMod = max(maxMod, len(csharpModifier(member.Type)))
+		maxType = max(maxType, len(csharpType(member.Type)))
+		maxVar = max(maxVar, len(member.VarName))
 	}
 
-	// Measure full code width for comment alignment
-	maxCode := 0
-	type constLine struct {
-		csType string
-		code   string
+	code := func(member *ConstDecl) string {
+		return "public " + padRight(csharpModifier(member.Type), maxMod) +
+			" " + padRight(csharpType(member.Type), maxType) +
+			" " + padRight(member.VarName, maxVar) +
+			" = " + csharpConstValue(member.Type, member.Value) + ";"
 	}
-	lines := make([]constLine, len(decls))
-	for i, member := range decls {
-		csType := csharpType(member.Type)
-		typePad := strings.Repeat(" ", maxType-len(csType))
-		varPad := strings.Repeat(" ", maxVar-len(member.VarName))
-		code := "public static readonly " + csType + typePad + " " + member.VarName + varPad + " = " + csharpConstValue(member.Type, member.Value) + ";"
-		lines[i] = constLine{csType: csType, code: code}
-		if n := len(code); n > maxCode {
+
+	// Measure full code width for trailing-comment alignment.
+	maxCode := 0
+	for i := range decls {
+		if n := len(code(decls[i])); n > maxCode {
 			maxCode = n
 		}
 	}
 
-	for i, member := range decls {
-		cl := lines[i]
-
+	for _, member := range decls {
 		// Per-entry doc comment
 		if member.LeadComment != "" && member.LeadComment != sectionComment {
 			for _, ln := range strings.Split(member.LeadComment, "\n") {
@@ -219,15 +182,23 @@ func emitCSharpConstClass(buf *strings.Builder, className string, decls []*Const
 			}
 		}
 
-		line := inner + cl.code
+		line := inner + code(member)
 		if member.TrailComment != "" {
-			codePad := strings.Repeat(" ", maxCode-len(cl.code))
-			line += codePad + "  // " + member.TrailComment
+			line = inner + padRight(code(member), maxCode) + "  // " + member.TrailComment
 		}
 		buf.WriteString(line + "\n")
 	}
 
-	buf.WriteString(indent + "}\n")
+	buf.WriteString("}\n")
+}
+
+// csharpModifier picks the field modifier for a member type: compile-time
+// scalars are `const`; UIDs are a struct ctor and must be `static readonly`.
+func csharpModifier(typeName string) string {
+	if typeName == "uid" {
+		return "static readonly"
+	}
+	return "const"
 }
 
 func csharpType(typeName string) string {
@@ -258,7 +229,7 @@ func csharpConstValue(typeName string, val *Value) string {
 		return fmt.Sprintf("new(%s, %s)", val.UIDPair.Hi, val.UIDPair.Lo)
 	}
 	if val.String != nil {
-		return strconv.Quote(*val.String)
+		return csharpQuote(*val.String)
 	}
 	if val.Float != nil {
 		switch typeName {

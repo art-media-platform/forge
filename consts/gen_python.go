@@ -2,7 +2,6 @@ package consts
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -21,71 +20,38 @@ func GeneratePython(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 		buf.WriteString("#   source: " + opts.SourceName + "\n")
 	}
 
-	// Collect declaration categories
-	var tagsBlocks []*TagsBlock
-	var scalars []*ConstDecl
-	var uidConsts []*ConstDecl
-	var groups []*ConstGroup
-	for _, decl := range cf.Decls {
-		switch {
-		case decl.Tags != nil:
-			tagsBlocks = append(tagsBlocks, decl.Tags)
-		case decl.Const != nil:
-			if decl.Const.Type == "uid" {
-				uidConsts = append(uidConsts, decl.Const)
-			} else {
-				scalars = append(scalars, decl.Const)
-			}
-		case decl.ConstGrp != nil:
-			groups = append(groups, decl.ConstGrp)
-		}
-	}
+	ds := categorize(cf)
 
 	// Self-contained type declarations — Python has no amp tag runtime, so the
 	// UID tuple alias and TagName shape are emitted inline.  TagName references
 	// UID; uid consts need UID alone.
-	needTagName := len(tagsBlocks) > 0
-	needUID := needTagName || len(uidConsts) > 0
-	if !needUID {
-		for _, grp := range groups {
-			for _, member := range grp.Members {
-				if member.Type == "uid" {
-					needUID = true
-					break
-				}
-			}
-			if needUID {
-				break
-			}
-		}
-	}
-	if needTagName {
+	if ds.needsTagName() {
 		buf.WriteString("\nfrom typing import NamedTuple\n")
 	}
-	if needUID {
+	if ds.needsUID() {
 		buf.WriteString("\nUID = tuple[int, int]\n")
 	}
-	if needTagName {
+	if ds.needsTagName() {
 		buf.WriteString("\n\nclass TagName(NamedTuple):\n")
 		buf.WriteString("    id:      UID\n")
 		buf.WriteString("    canonic: str\n")
 	}
 
-	for _, tb := range tagsBlocks {
+	for _, tb := range ds.Tags {
 		emitPyClass(&buf, tb)
 	}
 
 	// Top-level UID consts, then scalar consts — each a module-level run of
 	// annotated assignments.
-	if len(uidConsts) > 0 {
-		emitPyConsts(&buf, uidConsts)
+	if len(ds.UIDs) > 0 {
+		emitPyConsts(&buf, ds.UIDs)
 	}
-	if len(scalars) > 0 {
-		emitPyConsts(&buf, scalars)
+	if len(ds.Scalars) > 0 {
+		emitPyConsts(&buf, ds.Scalars)
 	}
 
 	// Grouped constants emit as classes; access is Group.Member.
-	for _, grp := range groups {
+	for _, grp := range ds.Groups {
 		emitPyGroup(&buf, grp)
 	}
 
@@ -283,7 +249,7 @@ func pyConstValue(val *Value) string {
 		return fmt.Sprintf("(%s, %s)", val.UIDPair.Hi, val.UIDPair.Lo)
 	}
 	if val.String != nil {
-		return strconv.Quote(*val.String)
+		return pyQuote(*val.String)
 	}
 	if val.Float != nil {
 		return fmt.Sprintf("%g", *val.Float)

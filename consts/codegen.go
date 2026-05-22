@@ -24,6 +24,57 @@ type GenTargets struct {
 	CSharpOut string // C# output directory
 	TSOut     string // TypeScript output directory
 	PyOut     string // Python output directory
+	COut      string // C output directory
+}
+
+// declSet buckets a parsed file's declarations by kind.  Every emitter opens by
+// calling categorize, so they all share one view of the file.
+type declSet struct {
+	Tags    []*TagsBlock  // tags { ... } blocks
+	Scalars []*ConstDecl  // top-level non-uid const scalars
+	UIDs    []*ConstDecl  // top-level const uid declarations
+	Groups  []*ConstGroup // const Name { ... } groups
+}
+
+// categorize sorts a file's top-level declarations into a declSet.
+func categorize(cf *ConstFile) declSet {
+	var ds declSet
+	for _, decl := range cf.Decls {
+		switch {
+		case decl.Tags != nil:
+			ds.Tags = append(ds.Tags, decl.Tags)
+		case decl.Const != nil:
+			if decl.Const.Type == "uid" {
+				ds.UIDs = append(ds.UIDs, decl.Const)
+			} else {
+				ds.Scalars = append(ds.Scalars, decl.Const)
+			}
+		case decl.ConstGrp != nil:
+			ds.Groups = append(ds.Groups, decl.ConstGrp)
+		}
+	}
+	return ds
+}
+
+// needsTagName reports whether the file references the TagName shape — true when
+// any tags block exists.  Runtime-less targets (TS, Python, C) emit TagName
+// inline only when this holds.
+func (ds declSet) needsTagName() bool { return len(ds.Tags) > 0 }
+
+// needsUID reports whether the file references the UID type anywhere: TagName
+// embeds a UID, and uid consts (top-level or inside a group) are bare UIDs.
+func (ds declSet) needsUID() bool {
+	if ds.needsTagName() || len(ds.UIDs) > 0 {
+		return true
+	}
+	for _, grp := range ds.Groups {
+		for _, member := range grp.Members {
+			if member.Type == "uid" {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // resolvedEntry holds pre-computed data for one tag entry output line.
@@ -131,6 +182,15 @@ func emitSectionHeader(buf *strings.Builder, comment, linePrefix string) {
 	}
 }
 
+// padRight right-pads s with spaces to width, for column alignment.  A width
+// smaller than len(s) leaves s unchanged.
+func padRight(s string, width int) string {
+	if pad := width - len(s); pad > 0 {
+		return s + strings.Repeat(" ", pad)
+	}
+	return s
+}
+
 // Generate parses a .consts.sdl file and writes output for each enabled target.
 func Generate(inputPath string, out GenTargets, opts *GenOpts) error {
 	src, err := os.ReadFile(inputPath)
@@ -205,6 +265,18 @@ func Generate(inputPath string, out GenTargets, opts *GenOpts) error {
 			return fmt.Errorf("generating Python: %w", err)
 		}
 		outPath := filepath.Join(out.PyOut, stem+".consts.py")
+		if err := os.WriteFile(outPath, src, 0644); err != nil {
+			return fmt.Errorf("writing %s: %w", outPath, err)
+		}
+		fmt.Printf("=> %s\n", outPath)
+	}
+
+	if out.COut != "" {
+		src, err := GenerateC(cf, opts)
+		if err != nil {
+			return fmt.Errorf("generating C: %w", err)
+		}
+		outPath := filepath.Join(out.COut, stem+".consts.h")
 		if err := os.WriteFile(outPath, src, 0644); err != nil {
 			return fmt.Errorf("writing %s: %w", outPath, err)
 		}

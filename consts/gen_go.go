@@ -2,12 +2,17 @@ package consts
 
 import (
 	"fmt"
+	"go/format"
 	"path"
-	"strconv"
 	"strings"
 )
 
 // GenerateGo emits Go source code from a parsed .consts.sdl file.
+//
+// Column alignment is left entirely to gofmt: this emitter writes simple
+// single-space declarations and runs the result through go/format, so the
+// output is canonical gofmt by construction (rather than hand-aligned columns
+// that gofmt would only re-flow).
 func GenerateGo(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 	if opts == nil {
 		opts = &GenOpts{}
@@ -29,64 +34,31 @@ func GenerateGo(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 	}
 	buf.WriteString("\npackage " + pkgName + "\n")
 
-	// Collect declaration categories
-	var tagsBlocks []*TagsBlock
-	var scalars []*ConstDecl
-	var uidConsts []*ConstDecl
-	var groups []*ConstGroup
-	for _, decl := range cf.Decls {
-		switch {
-		case decl.Tags != nil:
-			tagsBlocks = append(tagsBlocks, decl.Tags)
-		case decl.Const != nil:
-			if decl.Const.Type == "uid" {
-				uidConsts = append(uidConsts, decl.Const)
-			} else {
-				scalars = append(scalars, decl.Const)
-			}
-		case decl.ConstGrp != nil:
-			groups = append(groups, decl.ConstGrp)
-		}
-	}
+	ds := categorize(cf)
 
-	// Tag name struct + var
-	needsTagImport := len(tagsBlocks) > 0 || len(uidConsts) > 0
-	if !needsTagImport {
-		// Groups may also contain UIDs.
-		for _, grp := range groups {
-			for _, m := range grp.Members {
-				if m.Type == "uid" {
-					needsTagImport = true
-					break
-				}
-			}
-			if needsTagImport {
-				break
-			}
-		}
-	}
-	if needsTagImport {
+	// tag.Name / tag.UID come from amp.SDK; import only when referenced.
+	if ds.needsUID() {
 		buf.WriteString("\nimport \"github.com/art-media-platform/amp.SDK/stdlib/tag\"\n")
 	}
-	for _, tb := range tagsBlocks {
+	for _, tb := range ds.Tags {
 		emitGoTagsStruct(&buf, tb)
 	}
 
 	// Top-level UID vars — UIDs can't live in Go const blocks (struct literal),
 	// so they emit as package-scope `var` declarations.
-	if len(uidConsts) > 0 {
-		emitGoVarBlock(&buf, uidConsts, "", "")
+	if len(ds.UIDs) > 0 {
+		emitGoVarBlock(&buf, ds.UIDs, "", "")
 	}
 
 	// Top-level scalar constants
-	if len(scalars) > 0 {
-		emitGoConstBlock(&buf, scalars, "", "")
+	if len(ds.Scalars) > 0 {
+		emitGoConstBlock(&buf, ds.Scalars, "", "")
 	}
 
 	// Grouped constants: scalars in const (), UIDs in var () — split per-group,
 	// flat-prefixed by group name to match the existing Go-side convention
 	// (GlyphWebLink, PlanetInviteFileExt, etc.).
-	for _, grp := range groups {
+	for _, grp := range ds.Groups {
 		var grpScalars, grpUIDs []*ConstDecl
 		for _, m := range grp.Members {
 			if m.Type == "uid" {
@@ -105,7 +77,11 @@ func GenerateGo(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 		}
 	}
 
-	return []byte(buf.String()), nil
+	src, err := format.Source([]byte(buf.String()))
+	if err != nil {
+		return nil, fmt.Errorf("gofmt: %w", err)
+	}
+	return src, nil
 }
 
 // emitGoTagsStruct writes an anonymous struct var for a tags block.
@@ -122,19 +98,10 @@ func emitGoTagsStruct(buf *strings.Builder, tb *TagsBlock) {
 		allEntries = append(allEntries, sec.entries...)
 	}
 
-	// Measure max var name width across all entries
-	maxVar := 0
-	for _, entry := range allEntries {
-		if n := len(entry.varName); n > maxVar {
-			maxVar = n
-		}
-	}
-
 	// Anonymous struct type
 	buf.WriteString("\nvar " + tb.Name + " = struct {\n")
 	for _, entry := range allEntries {
-		pad := strings.Repeat(" ", maxVar-len(entry.varName))
-		buf.WriteString("\t" + entry.varName + pad + " tag.Name\n")
+		buf.WriteString("\t" + entry.varName + " tag.Name\n")
 	}
 	buf.WriteString("}{\n")
 
@@ -144,14 +111,16 @@ func emitGoTagsStruct(buf *strings.Builder, tb *TagsBlock) {
 		if blankBetweenSections(sections, i) {
 			buf.WriteString("\n")
 		}
-		emitGoTagSection(buf, &sections[i], maxVar)
+		emitGoTagSection(buf, &sections[i])
 	}
 
 	buf.WriteString("}\n")
 }
 
-// emitGoTagSection writes one alignment group inside the struct literal.
-func emitGoTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
+// emitGoTagSection writes one section of the struct literal.  gofmt aligns the
+// keys and trailing comments; this only places the source comments and the
+// blank-line breaks.
+func emitGoTagSection(buf *strings.Builder, sec *tagSection) {
 	if len(sec.entries) == 0 {
 		return
 	}
@@ -161,29 +130,7 @@ func emitGoTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 		emitSectionHeader(buf, sec.comment, "\t// ")
 	}
 
-	// First pass: build formatted lines and measure code column width
-	maxCode := 0
-
-	type goLine struct {
-		code   string
-		base32 string
-	}
-	lines := make([]goLine, len(sec.entries))
-	for i, entry := range sec.entries {
-		varPad := strings.Repeat(" ", maxVar-len(entry.varName))
-		lines[i] = goLine{
-			code:   entry.varName + varPad + ": " + goTagExpr(&entry) + ",",
-			base32: entry.base32,
-		}
-		if n := len(lines[i].code); n > maxCode {
-			maxCode = n
-		}
-	}
-
-	// Second pass: emit aligned entries (canonic is visible in the literal, comment is just Base32)
-	for i, entry := range sec.entries {
-		gl := lines[i]
-
+	for _, entry := range sec.entries {
 		// Per-entry doc comment (skip if same text as section header)
 		if entry.leadComment != "" && entry.leadComment != sec.comment {
 			for _, cl := range strings.Split(entry.leadComment, "\n") {
@@ -191,11 +138,8 @@ func emitGoTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 			}
 		}
 
-		codePad := strings.Repeat(" ", maxCode-len(gl.code))
-
-		trailing := gl.base32
-
-		buf.WriteString("\t" + gl.code + codePad + "  // " + trailing + "\n")
+		// canonic is visible in the literal; the trailing comment is just Base32.
+		buf.WriteString("\t" + entry.varName + ": " + goTagExpr(&entry) + ",  // " + entry.base32 + "\n")
 
 		// Visual break after parent entries (children follow)
 		if entry.isParent {
@@ -221,15 +165,6 @@ func emitGoVarBlock(buf *strings.Builder, decls []*ConstDecl, groupPrefix string
 		emitSectionHeader(buf, sectionComment, "// ")
 	}
 
-	// Measure var name widths for alignment
-	maxVar := 0
-	for _, d := range decls {
-		name := groupPrefix + d.VarName
-		if n := len(name); n > maxVar {
-			maxVar = n
-		}
-	}
-
 	buf.WriteString("var (\n")
 	for _, d := range decls {
 		name := groupPrefix + d.VarName
@@ -241,10 +176,7 @@ func emitGoVarBlock(buf *strings.Builder, decls []*ConstDecl, groupPrefix string
 			}
 		}
 
-		varPad := strings.Repeat(" ", maxVar-len(name))
-		val := goConstValue(d.Type, d.Value)
-
-		line := "\t" + name + varPad + " = " + val
+		line := "\t" + name + " = " + goConstValue(d.Type, d.Value)
 		if d.TrailComment != "" {
 			line += "  // " + d.TrailComment
 		}
@@ -256,7 +188,7 @@ func emitGoVarBlock(buf *strings.Builder, decls []*ConstDecl, groupPrefix string
 // goTagExpr builds the Go expression for a tag entry.
 // All entries emit as tag.Name with pre-computed literals.
 func goTagExpr(entry *resolvedEntry) string {
-	return fmt.Sprintf("tag.Name{ID: tag.UID{0x%016X, 0x%016X}, Canonic: %q}", entry.uidHi, entry.uidLo, entry.canonic)
+	return fmt.Sprintf("tag.Name{ID: tag.UID{0x%016X, 0x%016X}, Canonic: %s}", entry.uidHi, entry.uidLo, goQuote(entry.canonic))
 }
 
 // emitGoConstBlock writes a const () block for scalar constants.
@@ -275,15 +207,6 @@ func emitGoConstBlock(buf *strings.Builder, decls []*ConstDecl, groupPrefix stri
 		emitSectionHeader(buf, sectionComment, "// ")
 	}
 
-	// Measure var name widths for alignment
-	maxVar := 0
-	for _, sc := range decls {
-		name := groupPrefix + sc.VarName
-		if n := len(name); n > maxVar {
-			maxVar = n
-		}
-	}
-
 	buf.WriteString("const (\n")
 	for _, sc := range decls {
 		name := groupPrefix + sc.VarName
@@ -295,10 +218,7 @@ func emitGoConstBlock(buf *strings.Builder, decls []*ConstDecl, groupPrefix stri
 			}
 		}
 
-		varPad := strings.Repeat(" ", maxVar-len(name))
-		val := goConstValue(sc.Type, sc.Value)
-
-		line := "\t" + name + varPad + " = " + val
+		line := "\t" + name + " = " + goConstValue(sc.Type, sc.Value)
 		if sc.TrailComment != "" {
 			line += "  // " + sc.TrailComment
 		}
@@ -315,7 +235,7 @@ func goConstValue(typeName string, val *Value) string {
 		return fmt.Sprintf("tag.UID{%s, %s}", hi, lo)
 	}
 	if val.String != nil {
-		return strconv.Quote(*val.String)
+		return goQuote(*val.String)
 	}
 	if val.Float != nil {
 		switch typeName {

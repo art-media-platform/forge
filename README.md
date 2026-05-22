@@ -1,6 +1,6 @@
 # forge
 
-A codegen tool for **cross-language string and numerical constants** — the kind that need to stay byte-identical between Go, C#, TypeScript, Python, and other languages, with deterministic IDs that never drift across rebuilds.  PRs for other languages happily accepted.
+A codegen tool for **cross-language string and numerical constants** — the kind that need to stay byte-identical between Go, C#, TypeScript, Python, C, and other languages, with deterministic IDs that never drift across rebuilds.  PRs for other languages happily accepted.
 
 ## The Problem
 
@@ -45,7 +45,7 @@ Run:
 
 ```
 go run github.com/art-media-platform/forge/cmd/forge@latest consts your-project.consts.sdl \
-    --go_out=./go --csharp_out=./csharp --ts_out=./ts --py_out=./py
+    --go_out=./go --csharp_out=./csharp --ts_out=./ts --py_out=./py --c_out=./c
 ```
 
 Generated **Go**:
@@ -57,8 +57,8 @@ var ID = struct {
     BestShow      tag.Name
 }{
     SiteDownloads: tag.Name{ID: tag.UID{0xB30..., 0x379...}, Canonic: "http://acme.com/downloads/"},
-    TestNet      : tag.Name{ID: tag.UID{0x464..., 0xDC3...}, Canonic: "your-scheme://server.com:23382/path"},
-    BestShow     : tag.Name{ID: tag.UID{0x57B..., 0x78F...}, Canonic: "fraggle.rock"},
+    TestNet:       tag.Name{ID: tag.UID{0x464..., 0xDC3...}, Canonic: "your-scheme://server.com:23382/path"},
+    BestShow:      tag.Name{ID: tag.UID{0x57B..., 0x78F...}, Canonic: "fraggle.rock"},
 }
 
 var (
@@ -71,18 +71,22 @@ const (
 )
 ```
 
-Generated **C#**:
+Generated **C#** — file-scoped namespace, compile-time scalars as `const` (usable in attributes, `switch`, and other const contexts), UIDs as `static readonly` since a struct ctor isn't a constant expression:
 
 ```cs
+namespace your.project;
+
 public static partial class ID {
     public static readonly TagName SiteDownloads = new(new(0xB30..., 0x379...), "http://acme.com/downloads/");
     public static readonly TagName TestNet       = new(new(0x464..., 0xDC3...), "your-scheme://server.com:23382/path");
     public static readonly TagName BestShow      = new(new(0x57B..., 0x78F...), "fraggle.rock");
 }
 
-public static readonly UID    VendorAPIKey    = new(0x550..., 0xA71...);
-public static readonly string APIVersion      = "v3.1.0";
-public static readonly ulong  MaxItemsPerPage = 1000UL;
+public static partial class Const {
+    public const           string APIVersion      = "v3.1.0";
+    public const           ulong  MaxItemsPerPage = 1000UL;
+    public static readonly UID    VendorAPIKey    = new(0x550..., 0xA71...);
+}
 ```
 
 Generated **TypeScript** — zero runtime, self-contained types, `bigint` literals so 64-bit values never lose precision:
@@ -133,9 +137,35 @@ APIVersion:      str = "v3.1.0"
 MaxItemsPerPage: int = 1000
 ```
 
-Notice the `Canonic` field: forge normalizes each name before hashing — URLs and file paths keep their structure (scheme lowercased per RFC 3986), while plain text folds spaces and capitalization to a dotted form (`"Fraggle Rock"` → `"fraggle.rock"`). Equivalent spellings collapse to the same UID (full rules in the [`tag.UID`](#taguid) section below).
+Generated **C** — a single C99 header, zero dependencies, self-contained types, dotted `ID.SiteDownloads` access via designated initializers. The `FORGE_CONSTS_TYPES` guard lets several forge headers share one translation unit, and `FORGE_UNUSED` keeps it `-Wall -Wextra` clean even when a caller references only some of the constants:
+
+```c
+...
+
+static const struct {
+    TagName SiteDownloads;
+    TagName TestNet;
+    TagName BestShow;
+} ID FORGE_UNUSED = {
+    .SiteDownloads = { { 0xB30..., 0x379... }, "http://acme.com/downloads/" },
+    .TestNet       = { { 0x464..., 0xDC3... }, "your-scheme://server.com:23382/path" },
+    .BestShow      = { { 0x57B..., 0x78F... }, "fraggle.rock" },
+};
+
+static const struct {
+    const char *APIVersion;
+    uint64_t    MaxItemsPerPage;
+    UID         VendorAPIKey;
+} Const FORGE_UNUSED = {
+    .APIVersion      = "v3.1.0",
+    .MaxItemsPerPage = 1000ULL,
+    .VendorAPIKey    = { 0x550..., 0xA71... },
+};
+```
 
 ## `tag.UID`
+
+Notice the `Canonic` field: forge normalizes each name before hashing — URLs and file paths keep their structure (scheme lowercased per RFC 3986), while plain text folds spaces and capitalization to a dotted form (`"Fraggle Rock"` → `"fraggle.rock"`). Equivalent spellings collapse to the same UID (full rules in the [`tag.UID`](#taguid) section below).
 
 Every name compiles to a 128-bit identifier from the [`stdlib/tag`](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md) package of [amp.SDK](https://github.com/art-media-platform/amp.SDK) — a phonetic, search-friendly addressing system worth reading about in its own right. Forge emits it as two 64-bit halves, idiomatically per language:
 
@@ -145,8 +175,9 @@ Every name compiles to a 128-bit identifier from the [`stdlib/tag`](https://gith
 | C# | `UID` (two `ulong`) | `TagName` |
 | TypeScript | `readonly [bigint, bigint]` | `TagName` (interface) |
 | Python | `tuple[int, int]` | `TagName` (NamedTuple) |
+| C | `UID` (two `uint64_t`) | `TagName` (struct) |
 
-Go and C# reference these types from amp.SDK; TypeScript and Python have no tag runtime, so forge emits self-contained `UID` and `TagName` definitions inline. Either way, three things matter to forge users:
+Go and C# reference these types from amp.SDK; TypeScript, Python, and C have no tag runtime, so forge emits self-contained `UID` and `TagName` definitions inline. Either way, three things matter to forge users:
 
 - **Resilient short label** — `id.Base32()` gives a compact, human-safe string with no look-alike characters. Forge embeds it as a trailing comment on every generated line, so the readable label always sits beside the binary value.
 - **No runtime parsing liability** — the value is already a literal in your generated code; forge parsed it at codegen time. Your binary never parses a UUID string at startup unless *you* hand it one — no startup hashing, no parse-error branch, no cross-language library-version skew.
@@ -164,6 +195,7 @@ The repo's golden test exercises every grammar feature — tag hierarchies, UUID
 | [`grammar_test.consts.cs`](consts/golden/grammar_test.consts.cs) | generated C# |
 | [`grammar_test.consts.ts`](consts/golden/grammar_test.consts.ts) | generated TypeScript |
 | [`grammar_test.consts.py`](consts/golden/grammar_test.consts.py) | generated Python |
+| [`grammar_test.consts.h`](consts/golden/grammar_test.consts.h) | generated C |
 
 [`grammar_test.go`](consts/grammar_test.go) regenerates these on `go test ./...`.
 
@@ -189,7 +221,7 @@ go run github.com/art-media-platform/forge/cmd/forge@v0.2.0 consts ...
 
 ## CLI
 
-- `forge consts <file.consts.sdl> [--go_out=DIR] [--csharp_out=DIR] [--ts_out=DIR] [--py_out=DIR]` — emit Go, C#, TypeScript, and/or Python from a `.consts.sdl` source.
+- `forge consts <file.consts.sdl> [--go_out=DIR] [--csharp_out=DIR] [--ts_out=DIR] [--py_out=DIR] [--c_out=DIR]` — emit Go, C#, TypeScript, Python, and/or C from a `.consts.sdl` source.
 - `forge sdl <in.sdl> <out.sdl>` — parse and re-export an SDL file (round-trip / normalization).
 
 

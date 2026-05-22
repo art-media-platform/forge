@@ -2,7 +2,6 @@ package consts
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -21,69 +20,36 @@ func GenerateTypeScript(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 		buf.WriteString("//   source: " + opts.SourceName + "\n")
 	}
 
-	// Collect declaration categories
-	var tagsBlocks []*TagsBlock
-	var scalars []*ConstDecl
-	var uidConsts []*ConstDecl
-	var groups []*ConstGroup
-	for _, decl := range cf.Decls {
-		switch {
-		case decl.Tags != nil:
-			tagsBlocks = append(tagsBlocks, decl.Tags)
-		case decl.Const != nil:
-			if decl.Const.Type == "uid" {
-				uidConsts = append(uidConsts, decl.Const)
-			} else {
-				scalars = append(scalars, decl.Const)
-			}
-		case decl.ConstGrp != nil:
-			groups = append(groups, decl.ConstGrp)
-		}
-	}
+	ds := categorize(cf)
 
 	// Self-contained type declarations — TypeScript has no amp tag runtime, so
 	// the UID tuple and TagName shape are emitted inline.  TagName references
 	// UID; uid consts need UID alone.
-	needTagName := len(tagsBlocks) > 0
-	needUID := needTagName || len(uidConsts) > 0
-	if !needUID {
-		for _, grp := range groups {
-			for _, member := range grp.Members {
-				if member.Type == "uid" {
-					needUID = true
-					break
-				}
-			}
-			if needUID {
-				break
-			}
-		}
-	}
-	if needUID {
+	if ds.needsUID() {
 		buf.WriteString("\nexport type UID = readonly [bigint, bigint];\n")
 	}
-	if needTagName {
+	if ds.needsTagName() {
 		buf.WriteString("\nexport interface TagName {\n")
 		buf.WriteString("    readonly id:      UID;\n")
 		buf.WriteString("    readonly canonic: string;\n")
 		buf.WriteString("}\n")
 	}
 
-	for _, tb := range tagsBlocks {
+	for _, tb := range ds.Tags {
 		emitTSTagsBlock(&buf, tb)
 	}
 
 	// Top-level UID consts, then scalar consts — each an aligned run of
 	// `export const` declarations.
-	if len(uidConsts) > 0 {
-		emitTSExports(&buf, uidConsts)
+	if len(ds.UIDs) > 0 {
+		emitTSExports(&buf, ds.UIDs)
 	}
-	if len(scalars) > 0 {
-		emitTSExports(&buf, scalars)
+	if len(ds.Scalars) > 0 {
+		emitTSExports(&buf, ds.Scalars)
 	}
 
 	// Grouped constants emit as `as const` object literals; access is Group.Member.
-	for _, grp := range groups {
+	for _, grp := range ds.Groups {
 		emitTSGroup(&buf, grp)
 	}
 
@@ -277,7 +243,7 @@ func tsConstValue(typeName string, val *Value) string {
 		return fmt.Sprintf("[%sn, %sn]", val.UIDPair.Hi, val.UIDPair.Lo)
 	}
 	if val.String != nil {
-		return strconv.Quote(*val.String)
+		return tsQuote(*val.String)
 	}
 	if val.Float != nil {
 		return fmt.Sprintf("%g", *val.Float)
