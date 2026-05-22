@@ -5,6 +5,18 @@ import (
 	"strings"
 )
 
+// CEmitter renders C from src
+type CEmitter struct{}
+
+func (CEmitter) Generate(src *ConstFile, opts *GenOpts) ([]byte, error) { return GenerateC(src, opts) }
+func (CEmitter) Info() EmitterInfo {
+	return EmitterInfo{
+		Language:  "C",
+		Extension: ".h",
+		Flag:      "c_out",
+	}
+}
+
 // GenerateC emits a C99 header from a parsed .consts.sdl file.
 //
 // C has no namespaces or classes, so each tags block and const group becomes a
@@ -17,7 +29,7 @@ import (
 // guarded by FORGE_CONSTS_TYPES so several forge headers can be included in one
 // translation unit.  64-bit UID halves require <stdint.h>, which is C99 — there
 // is no portable pre-C99 64-bit integer type — so the output targets C99.
-func GenerateC(cf *ConstFile, opts *GenOpts) ([]byte, error) {
+func GenerateC(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	if opts == nil {
 		opts = &GenOpts{}
 	}
@@ -32,15 +44,15 @@ func GenerateC(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 	}
 	buf.WriteString("\n#pragma once\n")
 
-	ds := categorize(cf)
-	hasBlocks := len(ds.Tags) > 0 || len(ds.Groups) > 0 || len(ds.Scalars) > 0 || len(ds.UIDs) > 0
+	decls := categorize(src)
+	hasBlocks := len(decls.Tags) > 0 || len(decls.Groups) > 0 || len(decls.Scalars) > 0 || len(decls.UIDs) > 0
 
 	// <stdint.h> is needed for UID halves and for any fixed-width integer scalar.
-	needStdint := ds.needsUID()
-	for _, sc := range ds.Scalars {
+	needStdint := decls.needsUID()
+	for _, sc := range decls.Scalars {
 		needStdint = needStdint || cNeedsStdint(sc.Type)
 	}
-	for _, grp := range ds.Groups {
+	for _, grp := range decls.Groups {
 		for _, m := range grp.Members {
 			needStdint = needStdint || cNeedsStdint(m.Type)
 		}
@@ -53,44 +65,52 @@ func GenerateC(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 	// Portable "maybe unused" so a header full of constants the including file
 	// doesn't all reference stays warning-clean under -Wall -Wextra.
 	if hasBlocks {
-		buf.WriteString("\n#ifndef FORGE_UNUSED\n")
-		buf.WriteString("#if defined(__GNUC__) || defined(__clang__)\n")
-		buf.WriteString("#define FORGE_UNUSED __attribute__((unused))\n")
-		buf.WriteString("#else\n")
-		buf.WriteString("#define FORGE_UNUSED\n")
-		buf.WriteString("#endif\n")
-		buf.WriteString("#endif\n")
+		buf.WriteString(`
+#ifndef FORGE_UNUSED
+#if defined(__GNUC__) || defined(__clang__)
+#define FORGE_UNUSED __attribute__((unused))
+#else
+#define FORGE_UNUSED
+#endif
+#endif
+`)
 	}
 
 	// Self-contained types, guarded once across all forge headers in a TU.  Both
 	// UID and TagName are always defined together so a second header that needs
 	// TagName still finds it even if the first only needed UID.
-	if ds.needsUID() {
-		buf.WriteString("\n#ifndef FORGE_CONSTS_TYPES\n#define FORGE_CONSTS_TYPES\n")
-		buf.WriteString("\ntypedef struct {\n")
-		buf.WriteString("    uint64_t hi;\n")
-		buf.WriteString("    uint64_t lo;\n")
-		buf.WriteString("} UID;\n")
-		buf.WriteString("\ntypedef struct {\n")
-		buf.WriteString("    UID         id;\n")
-		buf.WriteString("    const char *canonic;\n")
-		buf.WriteString("} TagName;\n")
-		buf.WriteString("\n#endif // FORGE_CONSTS_TYPES\n")
+	if decls.needsUID() {
+		buf.WriteString(`
+#ifndef FORGE_CONSTS_TYPES
+#define FORGE_CONSTS_TYPES
+
+typedef struct {
+    uint64_t hi;
+    uint64_t lo;
+} UID;
+
+typedef struct {
+    UID         id;
+    const char *canonic;
+} TagName;
+
+#endif // FORGE_CONSTS_TYPES
+`)
 	}
 
-	for _, tb := range ds.Tags {
+	for _, tb := range decls.Tags {
 		emitCTagsBlock(&buf, tb)
 	}
 
 	// Grouped constants (scalars + UIDs coexist in one struct — C has no const
 	// restriction on aggregate members, unlike Go).
-	for _, grp := range ds.Groups {
+	for _, grp := range decls.Groups {
 		emitCConstStruct(&buf, grp.Name, grp.Members, grp.LeadComment)
 	}
 
 	// Top-level scalars + UIDs fold into a single `Const` struct, mirroring C#.
-	topMembers := append([]*ConstDecl{}, ds.Scalars...)
-	topMembers = append(topMembers, ds.UIDs...)
+	topMembers := append([]*ConstDecl{}, decls.Scalars...)
+	topMembers = append(topMembers, decls.UIDs...)
 	if len(topMembers) > 0 {
 		emitCConstStruct(&buf, "Const", topMembers, "")
 	}

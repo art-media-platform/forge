@@ -7,18 +7,32 @@ import (
 	"strings"
 )
 
+// GoEmitter renders the Go target.
+type GoEmitter struct{}
+
+func (GoEmitter) Generate(src *ConstFile, opts *GenOpts) ([]byte, error) {
+	return GenerateGo(src, opts)
+}
+func (GoEmitter) Info() EmitterInfo {
+	return EmitterInfo{
+		Language:  "Go",
+		Extension: ".go",
+		Flag:      "go_out",
+	}
+}
+
 // GenerateGo emits Go source code from a parsed .consts.sdl file.
 //
 // Column alignment is left entirely to gofmt: this emitter writes simple
 // single-space declarations and runs the result through go/format, so the
 // output is canonical gofmt by construction (rather than hand-aligned columns
 // that gofmt would only re-flow).
-func GenerateGo(cf *ConstFile, opts *GenOpts) ([]byte, error) {
+func GenerateGo(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	if opts == nil {
 		opts = &GenOpts{}
 	}
 
-	goPkg := cf.GetOption("go_package")
+	goPkg := src.GetOption("go_package")
 	if goPkg == "" {
 		return nil, fmt.Errorf("missing option go_package")
 	}
@@ -34,31 +48,31 @@ func GenerateGo(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 	}
 	buf.WriteString("\npackage " + pkgName + "\n")
 
-	ds := categorize(cf)
+	decls := categorize(src)
 
 	// tag.Name / tag.UID come from amp.SDK; import only when referenced.
-	if ds.needsUID() {
+	if decls.needsUID() {
 		buf.WriteString("\nimport \"github.com/art-media-platform/amp.SDK/stdlib/tag\"\n")
 	}
-	for _, tb := range ds.Tags {
+	for _, tb := range decls.Tags {
 		emitGoTagsStruct(&buf, tb)
 	}
 
 	// Top-level UID vars — UIDs can't live in Go const blocks (struct literal),
 	// so they emit as package-scope `var` declarations.
-	if len(ds.UIDs) > 0 {
-		emitGoVarBlock(&buf, ds.UIDs, "", "")
+	if len(decls.UIDs) > 0 {
+		emitGoVarBlock(&buf, decls.UIDs, "", "")
 	}
 
 	// Top-level scalar constants
-	if len(ds.Scalars) > 0 {
-		emitGoConstBlock(&buf, ds.Scalars, "", "")
+	if len(decls.Scalars) > 0 {
+		emitGoConstBlock(&buf, decls.Scalars, "", "")
 	}
 
 	// Grouped constants: scalars in const (), UIDs in var () — split per-group,
 	// flat-prefixed by group name to match the existing Go-side convention
 	// (GlyphWebLink, PlanetInviteFileExt, etc.).
-	for _, grp := range ds.Groups {
+	for _, grp := range decls.Groups {
 		var grpScalars, grpUIDs []*ConstDecl
 		for _, m := range grp.Members {
 			if m.Type == "uid" {
@@ -77,11 +91,11 @@ func GenerateGo(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 		}
 	}
 
-	src, err := format.Source([]byte(buf.String()))
+	formatted, err := format.Source([]byte(buf.String()))
 	if err != nil {
 		return nil, fmt.Errorf("gofmt: %w", err)
 	}
-	return src, nil
+	return formatted, nil
 }
 
 // emitGoTagsStruct writes an anonymous struct var for a tags block.

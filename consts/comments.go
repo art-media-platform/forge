@@ -61,8 +61,8 @@ func (cm *CommentMap) TrailingComment(line int) string {
 
 // Attach populates LeadComment and TrailComment fields on AST nodes
 // by matching source positions to nearby comments.
-func (cm *CommentMap) Attach(cf *ConstFile) {
-	for _, decl := range cf.Decls {
+func (cm *CommentMap) Attach(src *ConstFile) {
+	for _, decl := range src.Decls {
 		if decl.Tags != nil {
 			decl.Tags.LeadComment = cm.LeadingComment(decl.Tags.Pos.Line)
 			cm.attachTagEntries(decl.Tags.Entries)

@@ -5,13 +5,27 @@ import (
 	"strings"
 )
 
+// CSharpEmitter renders the C# target.
+type CSharpEmitter struct{}
+
+func (CSharpEmitter) Generate(src *ConstFile, opts *GenOpts) ([]byte, error) {
+	return GenerateCSharp(src, opts)
+}
+func (CSharpEmitter) Info() EmitterInfo {
+	return EmitterInfo{
+		Language:  "C#",
+		Extension: ".cs",
+		Flag:      "csharp_out",
+	}
+}
+
 // GenerateCSharp emits C# source code from a parsed .consts.sdl file.
-func GenerateCSharp(cf *ConstFile, opts *GenOpts) ([]byte, error) {
+func GenerateCSharp(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	if opts == nil {
 		opts = &GenOpts{}
 	}
 
-	ns := cf.GetOption("csharp_namespace")
+	ns := src.GetOption("csharp_namespace")
 	if ns == "" {
 		return nil, fmt.Errorf("missing option csharp_namespace")
 	}
@@ -27,25 +41,25 @@ func GenerateCSharp(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 	// File-scoped namespace (C# 10+): no wrapping braces, no extra indent.
 	buf.WriteString("\nnamespace " + ns + ";\n")
 
-	ds := categorize(cf)
+	decls := categorize(src)
 
 	// Emit tags blocks — do NOT fold in top-level UIDs.  Each tags block is a
 	// pure tag.Name namespace; UIDs get their own home in the Const class or
 	// in whatever ConstGroup they were declared in.
-	for _, tb := range ds.Tags {
+	for _, tb := range decls.Tags {
 		emitCSharpTagsBlock(&buf, tb)
 	}
 
 	// Emit grouped constants (scalars + UIDs coexist as public members).
-	for _, grp := range ds.Groups {
+	for _, grp := range decls.Groups {
 		emitCSharpConstClass(&buf, grp.Name, grp.Members, grp.LeadComment)
 	}
 
 	// Merge top-level scalars and top-level UIDs into a single "Const" class.
 	// No section-header hoist from the first member's comment — per-member
 	// doc comments stay inline alongside each field.
-	topMembers := append([]*ConstDecl{}, ds.Scalars...)
-	topMembers = append(topMembers, ds.UIDs...)
+	topMembers := append([]*ConstDecl{}, decls.Scalars...)
+	topMembers = append(topMembers, decls.UIDs...)
 	if len(topMembers) > 0 {
 		emitCSharpConstClass(&buf, "Const", topMembers, "")
 	}

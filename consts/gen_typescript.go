@@ -5,8 +5,22 @@ import (
 	"strings"
 )
 
+// TSEmitter renders the TypeScript target.
+type TSEmitter struct{}
+
+func (TSEmitter) Generate(src *ConstFile, opts *GenOpts) ([]byte, error) {
+	return GenerateTypeScript(src, opts)
+}
+func (TSEmitter) Info() EmitterInfo {
+	return EmitterInfo{
+		Language:  "TypeScript",
+		Extension: ".ts",
+		Flag:      "ts_out",
+	}
+}
+
 // GenerateTypeScript emits TypeScript source code from a parsed .consts.sdl file.
-func GenerateTypeScript(cf *ConstFile, opts *GenOpts) ([]byte, error) {
+func GenerateTypeScript(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	if opts == nil {
 		opts = &GenOpts{}
 	}
@@ -20,36 +34,36 @@ func GenerateTypeScript(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 		buf.WriteString("//   source: " + opts.SourceName + "\n")
 	}
 
-	ds := categorize(cf)
+	decls := categorize(src)
 
 	// Self-contained type declarations — TypeScript has no amp tag runtime, so
 	// the UID tuple and TagName shape are emitted inline.  TagName references
 	// UID; uid consts need UID alone.
-	if ds.needsUID() {
+	if decls.needsUID() {
 		buf.WriteString("\nexport type UID = readonly [bigint, bigint];\n")
 	}
-	if ds.needsTagName() {
+	if decls.needsTagName() {
 		buf.WriteString("\nexport interface TagName {\n")
 		buf.WriteString("    readonly id:      UID;\n")
 		buf.WriteString("    readonly canonic: string;\n")
 		buf.WriteString("}\n")
 	}
 
-	for _, tb := range ds.Tags {
+	for _, tb := range decls.Tags {
 		emitTSTagsBlock(&buf, tb)
 	}
 
 	// Top-level UID consts, then scalar consts — each an aligned run of
 	// `export const` declarations.
-	if len(ds.UIDs) > 0 {
-		emitTSExports(&buf, ds.UIDs)
+	if len(decls.UIDs) > 0 {
+		emitTSExports(&buf, decls.UIDs)
 	}
-	if len(ds.Scalars) > 0 {
-		emitTSExports(&buf, ds.Scalars)
+	if len(decls.Scalars) > 0 {
+		emitTSExports(&buf, decls.Scalars)
 	}
 
 	// Grouped constants emit as `as const` object literals; access is Group.Member.
-	for _, grp := range ds.Groups {
+	for _, grp := range decls.Groups {
 		emitTSGroup(&buf, grp)
 	}
 

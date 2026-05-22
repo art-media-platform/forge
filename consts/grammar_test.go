@@ -15,61 +15,34 @@ func TestGolden(t *testing.T) {
 	goldenDir := "golden"
 	sdlPath := filepath.Join(goldenDir, "grammar_test.sdl")
 
-	src, err := os.ReadFile(sdlPath)
+	text, err := os.ReadFile(sdlPath)
 	if err != nil {
 		t.Fatalf("reading %s: %v", sdlPath, err)
 	}
 
-	cf, err := Parse("grammar_test.sdl", src)
+	src, err := Parse("grammar_test.sdl", text)
 	if err != nil {
 		t.Fatal(err)
 	}
-	cm := ExtractComments(src)
-	cm.Attach(cf)
+	cm := ExtractComments(text)
+	cm.Attach(src)
 
-	if err := rewriteUUIDLiterals(cf); err != nil {
+	if err := rewriteUUIDLiterals(src); err != nil {
 		t.Fatalf("rewriteUUIDLiterals: %v", err)
 	}
 
 	opts := &GenOpts{SourceName: "grammar_test.sdl"}
 
-	goOut, err := GenerateGo(cf, opts)
-	if err != nil {
-		t.Fatalf("GenerateGo: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(goldenDir, "grammar_test.consts.go"), goOut, 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	csOut, err := GenerateCSharp(cf, opts)
-	if err != nil {
-		t.Fatalf("GenerateCSharp: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(goldenDir, "grammar_test.consts.cs"), csOut, 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	tsOut, err := GenerateTypeScript(cf, opts)
-	if err != nil {
-		t.Fatalf("GenerateTypeScript: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(goldenDir, "grammar_test.consts.ts"), tsOut, 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	pyOut, err := GeneratePython(cf, opts)
-	if err != nil {
-		t.Fatalf("GeneratePython: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(goldenDir, "grammar_test.consts.py"), pyOut, 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	cOut, err := GenerateC(cf, opts)
-	if err != nil {
-		t.Fatalf("GenerateC: %v", err)
-	}
-	if err := os.WriteFile(filepath.Join(goldenDir, "grammar_test.consts.h"), cOut, 0644); err != nil {
-		t.Fatal(err)
+	emitters := []Emitter{GoEmitter{}, CSharpEmitter{}, TSEmitter{}, PyEmitter{}, CEmitter{}}
+	for _, emitter := range emitters {
+		info := emitter.Info()
+		out, err := emitter.Generate(src, opts)
+		if err != nil {
+			t.Fatalf("Generate %s: %v", info.Language, err)
+		}
+		path := filepath.Join(goldenDir, "grammar_test"+constsInfix+info.Extension)
+		if err := os.WriteFile(path, out, 0644); err != nil {
+			t.Fatal(err)
+		}
 	}
 }

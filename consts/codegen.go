@@ -12,19 +12,14 @@ import (
 
 const sectionRuleWidth = 64 // total rune-width of ─── divider lines
 
+// constsInfix is the ".consts" segment shared by every generated filename
+// (<stem>.consts.<ext>) and trimmed off the input stem.  Emitters carry only
+// their language extension (".go", ".cs", …); this is added at the path site.
+const constsInfix = ".consts"
+
 // GenOpts controls code generation output.
 type GenOpts struct {
 	SourceName string // source filename for header comment
-}
-
-// GenTargets selects which language outputs Generate writes and where.
-// An empty directory disables that target.
-type GenTargets struct {
-	GoOut     string // Go output directory
-	CSharpOut string // C# output directory
-	TSOut     string // TypeScript output directory
-	PyOut     string // Python output directory
-	COut      string // C output directory
 }
 
 // declSet buckets a parsed file's declarations by kind.  Every emitter opens by
@@ -37,37 +32,37 @@ type declSet struct {
 }
 
 // categorize sorts a file's top-level declarations into a declSet.
-func categorize(cf *ConstFile) declSet {
-	var ds declSet
-	for _, decl := range cf.Decls {
+func categorize(src *ConstFile) declSet {
+	var decls declSet
+	for _, decl := range src.Decls {
 		switch {
 		case decl.Tags != nil:
-			ds.Tags = append(ds.Tags, decl.Tags)
+			decls.Tags = append(decls.Tags, decl.Tags)
 		case decl.Const != nil:
 			if decl.Const.Type == "uid" {
-				ds.UIDs = append(ds.UIDs, decl.Const)
+				decls.UIDs = append(decls.UIDs, decl.Const)
 			} else {
-				ds.Scalars = append(ds.Scalars, decl.Const)
+				decls.Scalars = append(decls.Scalars, decl.Const)
 			}
 		case decl.ConstGrp != nil:
-			ds.Groups = append(ds.Groups, decl.ConstGrp)
+			decls.Groups = append(decls.Groups, decl.ConstGrp)
 		}
 	}
-	return ds
+	return decls
 }
 
 // needsTagName reports whether the file references the TagName shape — true when
 // any tags block exists.  Runtime-less targets (TS, Python, C) emit TagName
 // inline only when this holds.
-func (ds declSet) needsTagName() bool { return len(ds.Tags) > 0 }
+func (decls declSet) needsTagName() bool { return len(decls.Tags) > 0 }
 
 // needsUID reports whether the file references the UID type anywhere: TagName
 // embeds a UID, and uid consts (top-level or inside a group) are bare UIDs.
-func (ds declSet) needsUID() bool {
-	if ds.needsTagName() || len(ds.UIDs) > 0 {
+func (decls declSet) needsUID() bool {
+	if decls.needsTagName() || len(decls.UIDs) > 0 {
 		return true
 	}
-	for _, grp := range ds.Groups {
+	for _, grp := range decls.Groups {
 		for _, member := range grp.Members {
 			if member.Type == "uid" {
 				return true
@@ -191,31 +186,43 @@ func padRight(s string, width int) string {
 	return s
 }
 
-// Generate parses a .consts.sdl file and writes output for each enabled target.
-func Generate(inputPath string, out GenTargets, opts *GenOpts) error {
-	src, err := os.ReadFile(inputPath)
+// Generator parses one .consts.sdl file and writes output for each requested
+// language target.  The caller supplies the emitter set explicitly (see
+// cmd/forge), so adding a target is a one-line edit there rather than a registry.
+type Generator struct {
+	InputPath string            // path to the .consts.sdl source
+	Emitters  []Emitter         // candidate targets
+	OutDirs   map[string]string // emitter Info().Flag → output directory ("" = skip)
+	Opts      *GenOpts          // optional codegen options
+}
+
+// Run parses the source and writes each emitter whose flag maps to a non-empty
+// directory in OutDirs.
+func (g Generator) Run() error {
+	text, err := os.ReadFile(g.InputPath)
 	if err != nil {
-		return fmt.Errorf("reading %s: %w", inputPath, err)
+		return fmt.Errorf("reading %s: %w", g.InputPath, err)
 	}
 
-	cf, err := Parse(inputPath, src)
+	src, err := Parse(g.InputPath, text)
 	if err != nil {
 		return err
 	}
 
 	// Attach source comments to AST nodes (protoc-style position matching)
-	comments := ExtractComments(src)
-	comments.Attach(cf)
+	comments := ExtractComments(text)
+	comments.Attach(src)
 
 	// Normalize UUID-string `uid` literals into canonical hex-pair form.
-	if err := rewriteUUIDLiterals(cf); err != nil {
+	if err := rewriteUUIDLiterals(src); err != nil {
 		return err
 	}
 
-	baseName := filepath.Base(inputPath)
+	baseName := filepath.Base(g.InputPath)
 	stem := strings.TrimSuffix(baseName, filepath.Ext(baseName))
-	stem = strings.TrimSuffix(stem, ".consts") // amp.std.consts.sdl → amp.std
+	stem = strings.TrimSuffix(stem, constsInfix) // amp.std.consts.sdl → amp.std
 
+	opts := g.Opts
 	if opts == nil {
 		opts = &GenOpts{}
 	}
@@ -223,61 +230,18 @@ func Generate(inputPath string, out GenTargets, opts *GenOpts) error {
 		opts.SourceName = baseName
 	}
 
-	if out.GoOut != "" {
-		src, err := GenerateGo(cf, opts)
+	for _, emitter := range g.Emitters {
+		info := emitter.Info()
+		dir := g.OutDirs[info.Flag]
+		if dir == "" {
+			continue // target not requested
+		}
+		generated, err := emitter.Generate(src, opts)
 		if err != nil {
-			return fmt.Errorf("generating Go: %w", err)
+			return fmt.Errorf("generating %s: %w", info.Language, err)
 		}
-		outPath := filepath.Join(out.GoOut, stem+".consts.go")
-		if err := os.WriteFile(outPath, src, 0644); err != nil {
-			return fmt.Errorf("writing %s: %w", outPath, err)
-		}
-		fmt.Printf("=> %s\n", outPath)
-	}
-
-	if out.CSharpOut != "" {
-		src, err := GenerateCSharp(cf, opts)
-		if err != nil {
-			return fmt.Errorf("generating C#: %w", err)
-		}
-		outPath := filepath.Join(out.CSharpOut, stem+".consts.cs")
-		if err := os.WriteFile(outPath, src, 0644); err != nil {
-			return fmt.Errorf("writing %s: %w", outPath, err)
-		}
-		fmt.Printf("=> %s\n", outPath)
-	}
-
-	if out.TSOut != "" {
-		src, err := GenerateTypeScript(cf, opts)
-		if err != nil {
-			return fmt.Errorf("generating TypeScript: %w", err)
-		}
-		outPath := filepath.Join(out.TSOut, stem+".consts.ts")
-		if err := os.WriteFile(outPath, src, 0644); err != nil {
-			return fmt.Errorf("writing %s: %w", outPath, err)
-		}
-		fmt.Printf("=> %s\n", outPath)
-	}
-
-	if out.PyOut != "" {
-		src, err := GeneratePython(cf, opts)
-		if err != nil {
-			return fmt.Errorf("generating Python: %w", err)
-		}
-		outPath := filepath.Join(out.PyOut, stem+".consts.py")
-		if err := os.WriteFile(outPath, src, 0644); err != nil {
-			return fmt.Errorf("writing %s: %w", outPath, err)
-		}
-		fmt.Printf("=> %s\n", outPath)
-	}
-
-	if out.COut != "" {
-		src, err := GenerateC(cf, opts)
-		if err != nil {
-			return fmt.Errorf("generating C: %w", err)
-		}
-		outPath := filepath.Join(out.COut, stem+".consts.h")
-		if err := os.WriteFile(outPath, src, 0644); err != nil {
+		outPath := filepath.Join(dir, stem+constsInfix+info.Extension)
+		if err := os.WriteFile(outPath, generated, 0644); err != nil {
 			return fmt.Errorf("writing %s: %w", outPath, err)
 		}
 		fmt.Printf("=> %s\n", outPath)

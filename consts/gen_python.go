@@ -5,8 +5,22 @@ import (
 	"strings"
 )
 
+// PyEmitter renders the Python target.
+type PyEmitter struct{}
+
+func (PyEmitter) Generate(src *ConstFile, opts *GenOpts) ([]byte, error) {
+	return GeneratePython(src, opts)
+}
+func (PyEmitter) Info() EmitterInfo {
+	return EmitterInfo{
+		Language:  "Python",
+		Extension: ".py",
+		Flag:      "py_out",
+	}
+}
+
 // GeneratePython emits Python source code from a parsed .consts.sdl file.
-func GeneratePython(cf *ConstFile, opts *GenOpts) ([]byte, error) {
+func GeneratePython(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	if opts == nil {
 		opts = &GenOpts{}
 	}
@@ -20,38 +34,38 @@ func GeneratePython(cf *ConstFile, opts *GenOpts) ([]byte, error) {
 		buf.WriteString("#   source: " + opts.SourceName + "\n")
 	}
 
-	ds := categorize(cf)
+	decls := categorize(src)
 
 	// Self-contained type declarations — Python has no amp tag runtime, so the
 	// UID tuple alias and TagName shape are emitted inline.  TagName references
 	// UID; uid consts need UID alone.
-	if ds.needsTagName() {
+	if decls.needsTagName() {
 		buf.WriteString("\nfrom typing import NamedTuple\n")
 	}
-	if ds.needsUID() {
+	if decls.needsUID() {
 		buf.WriteString("\nUID = tuple[int, int]\n")
 	}
-	if ds.needsTagName() {
+	if decls.needsTagName() {
 		buf.WriteString("\n\nclass TagName(NamedTuple):\n")
 		buf.WriteString("    id:      UID\n")
 		buf.WriteString("    canonic: str\n")
 	}
 
-	for _, tb := range ds.Tags {
+	for _, tb := range decls.Tags {
 		emitPyClass(&buf, tb)
 	}
 
 	// Top-level UID consts, then scalar consts — each a module-level run of
 	// annotated assignments.
-	if len(ds.UIDs) > 0 {
-		emitPyConsts(&buf, ds.UIDs)
+	if len(decls.UIDs) > 0 {
+		emitPyConsts(&buf, decls.UIDs)
 	}
-	if len(ds.Scalars) > 0 {
-		emitPyConsts(&buf, ds.Scalars)
+	if len(decls.Scalars) > 0 {
+		emitPyConsts(&buf, decls.Scalars)
 	}
 
 	// Grouped constants emit as classes; access is Group.Member.
-	for _, grp := range ds.Groups {
+	for _, grp := range decls.Groups {
 		emitPyGroup(&buf, grp)
 	}
 

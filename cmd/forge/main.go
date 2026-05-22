@@ -29,14 +29,30 @@ type ConstsGen struct {
 	COut      string `name:"c_out"       help:"C output directory"          optional:""`
 }
 
+// emitters is the explicit set of code generators forge ships.  Adding a
+// language is a one-line edit here plus its gen_<lang>.go file — no registry.
+var emitters = []consts.Emitter{
+	consts.GoEmitter{},
+	consts.CSharpEmitter{},
+	consts.TSEmitter{},
+	consts.PyEmitter{},
+	consts.CEmitter{},
+}
+
 func (cmd *ConstsGen) Run() error {
-	return consts.Generate(cmd.FileIn, consts.GenTargets{
-		GoOut:     cmd.GoOut,
-		CSharpOut: cmd.CSharpOut,
-		TSOut:     cmd.TSOut,
-		PyOut:     cmd.PyOut,
-		COut:      cmd.COut,
-	}, nil)
+	// Each emitter selects its directory by its EmitterInfo.Flag; keys here match
+	// the kong flag names above.
+	return consts.Generator{
+		InputPath: cmd.FileIn,
+		Emitters:  emitters,
+		OutDirs: map[string]string{
+			"go_out":     cmd.GoOut,
+			"csharp_out": cmd.CSharpOut,
+			"ts_out":     cmd.TSOut,
+			"py_out":     cmd.PyOut,
+			"c_out":      cmd.COut,
+		},
+	}.Run()
 }
 
 type FilterSDL struct {

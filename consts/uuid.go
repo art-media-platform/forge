@@ -14,8 +14,8 @@ import (
 // urn:uuid: prefixed.  Case-insensitive.
 //
 // Fails fast with file:line information if any uid string fails to parse.
-func rewriteUUIDLiterals(cf *ConstFile) error {
-	for _, decl := range cf.Decls {
+func rewriteUUIDLiterals(src *ConstFile) error {
+	for _, decl := range src.Decls {
 		if decl.Const != nil {
 			if err := rewriteOne(decl.Const); err != nil {
 				return err

@@ -123,8 +123,8 @@ func Parse(filename string, src []byte) (*ConstFile, error) {
 }
 
 // GetOption returns the value for a named option, or "" if not found.
-func (cf *ConstFile) GetOption(name string) string {
-	for _, decl := range cf.Decls {
+func (src *ConstFile) GetOption(name string) string {
+	for _, decl := range src.Decls {
 		if decl.Option != nil && decl.Option.Name == name {
 			return decl.Option.Value
 		}
