@@ -77,21 +77,21 @@ const (
 )
 ```
 
-Generated **C#** — file-scoped namespace, compile-time scalars as `const` (usable in attributes, `switch`, and other const contexts), UIDs as `static readonly` since a struct ctor isn't a constant expression:
+Generated **C#** — block-scoped namespace (C# 9 compatible, so it builds under Unity), compile-time scalars as `const` (usable in attributes, `switch`, and other const contexts), UIDs as `static readonly` since a struct ctor isn't a constant expression:
 
 ```cs
-namespace your.project;
+namespace your.project {
+    public static partial class ID {
+        public static readonly TagName SiteDownloads = new(new(0xB30..., 0x379...), "http://acme.com/downloads/");
+        public static readonly TagName TestNet       = new(new(0x464..., 0xDC3...), "your-scheme://server.com:23382/path");
+        public static readonly TagName BestShow      = new(new(0x57B..., 0x78F...), "fraggle.rock");
+    }
 
-public static partial class ID {
-    public static readonly TagName SiteDownloads = new(new(0xB30..., 0x379...), "http://acme.com/downloads/");
-    public static readonly TagName TestNet       = new(new(0x464..., 0xDC3...), "your-scheme://server.com:23382/path");
-    public static readonly TagName BestShow      = new(new(0x57B..., 0x78F...), "fraggle.rock");
-}
-
-public static partial class Const {
-    public const           string APIVersion      = "v3.1.0";
-    public const           ulong  MaxItemsPerPage = 1000UL;
-    public static readonly UID    VendorAPIKey    = new(0x550..., 0xA71...);
+    public static partial class Const {
+        public const           string APIVersion      = "v3.1.0";
+        public const           ulong  MaxItemsPerPage = 1000UL;
+        public static readonly UID    VendorAPIKey    = new(0x550..., 0xA71...);
+    }
 }
 ```
 
@@ -221,7 +221,7 @@ go install github.com/art-media-platform/forge/cmd/forge@latest
 Or run pinned without installing:
 
 ```
-go run github.com/art-media-platform/forge/cmd/forge@v0.3.0 consts ...
+go run github.com/art-media-platform/forge/cmd/forge@v0.3.1 consts ...
 ```
 
 ## CLI

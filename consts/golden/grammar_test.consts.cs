@@ -2,82 +2,82 @@
 //
 //   source: grammar_test.sdl
 
-namespace art.media.platform.std;
+namespace art.media.platform.std {
+    public static partial class Name {
+        // ─── This is a big fancy comment, ───────────────────────────────
+        public static readonly TagName AppTag              = new(new(0x9FC2012FD63F847A, 0x51AA55A31D90CD25), "app");        // 4ZS80KZPJZHJX53BKPNDFT1M95
 
-public static partial class Name {
-    // ─── This is a big fancy comment, ───────────────────────────────
-    public static readonly TagName AppTag              = new(new(0x9FC2012FD63F847A, 0x51AA55A31D90CD25), "app");        // 4ZS80KZPJZHJX53BKPNDFT1M95
+        public static readonly TagName AppState            = new(new(0xB0E0A1DFE9CF1CE2, 0x6D372EA4CD284F8D), "app.state");  // 5HW2HXZUFG3MJ6UETFNM6KHMWE
 
-    public static readonly TagName AppState            = new(new(0xB0E0A1DFE9CF1CE2, 0x6D372EA4CD284F8D), "app.state");  // 5HW2HXZUFG3MJ6UETFNM6KHMWE
+        // ─── This is a very descriptive comment ─────────────────────────
+        // that spans multiple lines to exercise
+        // the multi-line doc-comment code path.
+        public static readonly TagName SessionAttr         = new(new(0x5948CA6969CBDF2F, 0x01C92A44FA60AB24), "session");                          // 2T9356KUFCVWRH3K9B8MX61BT4
 
-    // ─── This is a very descriptive comment ─────────────────────────
-    // that spans multiple lines to exercise
-    // the multi-line doc-comment code path.
-    public static readonly TagName SessionAttr         = new(new(0x5948CA6969CBDF2F, 0x01C92A44FA60AB24), "session");                          // 2T9356KUFCVWRH3K9B8MX61BT4
+        public static readonly TagName LoginID             = new(new(0xCC1664C727510447, 0xFBE5F2B6BC492F9D), "session.login");                    // 6D2TKDF9UJ0J3ZRTGKQUY4KCWX
+        public static readonly TagName SessionTag          = new(new(0x0F2E0253AA120335, 0x4355B536D92A8B5A), "session.tag");                      // 0G5S157BHK0DUN6PEP6VDKP2UU
 
-    public static readonly TagName LoginID             = new(new(0xCC1664C727510447, 0xFBE5F2B6BC492F9D), "session.login");                    // 6D2TKDF9UJ0J3ZRTGKQUY4KCWX
-    public static readonly TagName SessionTag          = new(new(0x0F2E0253AA120335, 0x4355B536D92A8B5A), "session.tag");                      // 0G5S157BHK0DUN6PEP6VDKP2UU
+        public static readonly TagName LaunchWeb           = new(new(0x972CEB01661BA7F5, 0xC8E19B9BC9291F22), "session.tag.www");                  // 4R5MPH2THVNZUWJSDVMG4KK7T2
+        public static readonly TagName ReallySuperLongName = new(new(0xAC9496188C89AB63, 0xF81E6F8687799949), "session.tag.reallysuperlongname");  // 5DKKC1J349PEJZH7MGHU3RM6B9
+    }
 
-    public static readonly TagName LaunchWeb           = new(new(0x972CEB01661BA7F5, 0xC8E19B9BC9291F22), "session.tag.www");                  // 4R5MPH2THVNZUWJSDVMG4KK7T2
-    public static readonly TagName ReallySuperLongName = new(new(0xAC9496188C89AB63, 0xF81E6F8687799949), "session.tag.reallysuperlongname");  // 5DKKC1J349PEJZH7MGHU3RM6B9
-}
+    public static partial class ID {
+        public static readonly TagName SiteDownloads = new(new(0xB30A33823CA36F9E, 0x379DE2617633209C), "http://acme.com/downloads/");  // 5M18TS4G53EYG3G7G2D5V3684W
+        public static readonly TagName TestNet       = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 2681ZFCW558ERXSF1Y0S0Y6F3B
+        public static readonly TagName BestShow      = new(new(0x57B2E51533698C3F, 0x78FFA34D801D6675), "fraggle.rock");  // 2RQCKJBDV9JHZRJZX39Q01UTMP
+    }
 
-public static partial class ID {
-    public static readonly TagName SiteDownloads = new(new(0xB30A33823CA36F9E, 0x379DE2617633209C), "http://acme.com/downloads/");  // 5M18TS4G53EYG3G7G2D5V3684W
-    public static readonly TagName TestNet       = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 2681ZFCW558ERXSF1Y0S0Y6F3B
-    public static readonly TagName BestShow      = new(new(0x57B2E51533698C3F, 0x78FFA34D801D6675), "fraggle.rock");  // 2RQCKJBDV9JHZRJZX39Q01UTMP
-}
+    public static partial class SomeFiles {
+        public const string WindowsHosts = "C:\\Windows\\System32\\drivers\\etc\\hosts";
+        public const string UnixHosts    = "/etc/hosts";
+        public const string MacHosts     = "/private/etc/hosts";
+    }
 
-public static partial class SomeFiles {
-    public const string WindowsHosts = "C:\\Windows\\System32\\drivers\\etc\\hosts";
-    public const string UnixHosts    = "/etc/hosts";
-    public const string MacHosts     = "/private/etc/hosts";
-}
+    public static partial class Moar {
+        public const ulong  MaxFraction = 1000000000UL;
+        public const double TwoPi       = 3.14159265358979;
+        public const string Striiing    = "hello sailor";
+    }
 
-public static partial class Moar {
-    public const ulong  MaxFraction = 1000000000UL;
-    public const double TwoPi       = 3.14159265358979;
-    public const string Striiing    = "hello sailor";
-}
+    public static partial class Glyph {
+        public const string WebLink     = "asset:glyph/web.link";
+        public const string DefaultNode = "asset:glyph/default.node";
+    }
 
-public static partial class Glyph {
-    public const string WebLink     = "asset:glyph/web.link";
-    public const string DefaultNode = "asset:glyph/default.node";
-}
+    public static partial class Herro {
+        public const string WebLink     = "fooled you";
+        public const string DefaultNode = "default this";
+    }
 
-public static partial class Herro {
-    public const string WebLink     = "fooled you";
-    public const string DefaultNode = "default this";
-}
+    // ─── Mixed-type group: scalars emit as const, UIDs as var (Go forbids struct ───
+    // literals in const blocks).  Flat-prefixed by the group name — access is
+    // `std.SessionContextID` + `std.SessionLaunchPath`.
+    public static partial class Session {
+        public static readonly UID    ContextID  = new(0x0, 0x777);
+        public const           string LaunchPath = "/session/start";
+    }
 
-// ─── Mixed-type group: scalars emit as const, UIDs as var (Go forbids struct ───
-// literals in const blocks).  Flat-prefixed by the group name — access is
-// `std.SessionContextID` + `std.SessionLaunchPath`.
-public static partial class Session {
-    public static readonly UID    ContextID  = new(0x0, 0x777);
-    public const           string LaunchPath = "/session/start";
-}
-
-public static partial class Const {
-    // Scalar string constants
-    public const           ulong  MaxFraction    = 1000000000UL;
-    public const           ulong  HexConst       = 0xFFFFFFFFFFFFFFF0UL;
-    public const           double Pi             = 3.14159265358979;
-    public const           float  SmallPi        = 3.14f;
-    public const           double TwoPi          = 3.14159265358979;
-    // Bootstrapping node ID
-    public static readonly UID    TestingID      = new(0x7, 0x8);
-    // UUID literals — every form accepted by gofrs/uuid.FromString is normalized
-    // to the same {hi, lo} hex-pair output.  Same UUID, six syntactic spellings:
-    public static readonly UID    UUID_Canonical = new(0x550E8400E29B41D4, 0xA716446655440000);
-    public static readonly UID    UUID_Uppercase = new(0x550E8400E29B41D4, 0xA716446655440000);
-    public static readonly UID    UUID_Compact   = new(0x550E8400E29B41D4, 0xA716446655440000);
-    public static readonly UID    UUID_Braced    = new(0x550E8400E29B41D4, 0xA716446655440000);
-    public static readonly UID    UUID_URN       = new(0x550E8400E29B41D4, 0xA716446655440000);
-    public static readonly UID    UUID_MixedCase = new(0x550E8400E29B41D4, 0xA716446655440000);
-    // Sentinel UUIDs that downstream callers occasionally need to express.
-    public static readonly UID    UUID_Nil       = new(0x0000000000000000, 0x0000000000000000);
-    public static readonly UID    UUID_Max       = new(0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
-    // A distinct UUID, to confirm the parser disambiguates between sources.
-    public static readonly UID    HiMom          = new(0x6BA7B8109DAD11D1, 0x80B400C04FD430C8);
+    public static partial class Const {
+        // Scalar string constants
+        public const           ulong  MaxFraction    = 1000000000UL;
+        public const           ulong  HexConst       = 0xFFFFFFFFFFFFFFF0UL;
+        public const           double Pi             = 3.14159265358979;
+        public const           float  SmallPi        = 3.14f;
+        public const           double TwoPi          = 3.14159265358979;
+        // Bootstrapping node ID
+        public static readonly UID    TestingID      = new(0x7, 0x8);
+        // UUID literals — every form accepted by gofrs/uuid.FromString is normalized
+        // to the same {hi, lo} hex-pair output.  Same UUID, six syntactic spellings:
+        public static readonly UID    UUID_Canonical = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_Uppercase = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_Compact   = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_Braced    = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_URN       = new(0x550E8400E29B41D4, 0xA716446655440000);
+        public static readonly UID    UUID_MixedCase = new(0x550E8400E29B41D4, 0xA716446655440000);
+        // Sentinel UUIDs that downstream callers occasionally need to express.
+        public static readonly UID    UUID_Nil       = new(0x0000000000000000, 0x0000000000000000);
+        public static readonly UID    UUID_Max       = new(0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
+        // A distinct UUID, to confirm the parser disambiguates between sources.
+        public static readonly UID    HiMom          = new(0x6BA7B8109DAD11D1, 0x80B400C04FD430C8);
+    }
 }
