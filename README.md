@@ -25,6 +25,10 @@ One `.sdl` source file, multiple language outputs. IDs computed once at codegen 
 ```
 // your-project.consts.sdl
 
+// Go and C# need a package / namespace; TypeScript, Python, and C don't.
+option go_package = "github.com/you/project/widget";
+option csharp_namespace = "your.project";
+
 // Stable, named identifiers — names get hashed to UIDs at codegen time.
 tags ID {
     SiteDownloads "http://acme.com/downloads/"
@@ -51,6 +55,8 @@ go run github.com/art-media-platform/forge/cmd/forge@latest consts your-project.
 Generated **Go**:
 
 ```go
+package widget
+
 var ID = struct {
     SiteDownloads tag.Name
     TestNet       tag.Name
@@ -155,7 +161,7 @@ static const struct {
 static const struct {
     const char *APIVersion;
     uint64_t    MaxItemsPerPage;
-    UID         VendorAPIKey;
+    TagUID      VendorAPIKey;
 } Const FORGE_UNUSED = {
     .APIVersion      = "v3.1.0",
     .MaxItemsPerPage = 1000ULL,
@@ -165,24 +171,23 @@ static const struct {
 
 ## `tag.UID`
 
-Notice the `Canonic` field: forge normalizes each name before hashing — URLs and file paths keep their structure (scheme lowercased per RFC 3986), while plain text folds spaces and capitalization to a dotted form (`"Fraggle Rock"` → `"fraggle.rock"`). Equivalent spellings collapse to the same UID (full rules in the [`tag.UID`](#taguid) section below).
-
-Every name compiles to a 128-bit identifier from the [`stdlib/tag`](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md) package of [amp.SDK](https://github.com/art-media-platform/amp.SDK) — a phonetic, search-friendly addressing system worth reading about in its own right. Forge emits it as two 64-bit halves, idiomatically per language:
+Every name compiles to a 128-bit identifier from the [`stdlib/tag`](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md) package of [amp.SDK](https://github.com/art-media-platform/amp.SDK) — a phonetic, search-friendly addressing system worth reading about in its own right. Forge emits these depending on the language:
 
 | Language | `UID` | `TagName` |
 |---|---|---|
-| Go | `tag.UID` (two `uint64`) | `tag.Name` |
-| C# | `UID` (two `ulong`) | `TagName` |
+| Go | `tag.UID` (two `uint64`) | `tag.Name` (struct) |
+| C# | `UID` (two `ulong`) | `TagName` (readonly struct) |
 | TypeScript | `readonly [bigint, bigint]` | `TagName` (interface) |
 | Python | `tuple[int, int]` | `TagName` (NamedTuple) |
-| C | `UID` (two `uint64_t`) | `TagName` (struct) |
+| C | `TagUID` (two `uint64_t`) | `TagName` (struct) |
 
-Go and C# reference these types from amp.SDK; TypeScript, Python, and C have no tag runtime, so forge emits self-contained `UID` and `TagName` definitions inline. Either way, three things matter to forge users:
+
+Either way, three things matter to forge users:
 
 - **Resilient short label** — `id.Base32()` gives a compact, human-safe string with no look-alike characters. Forge embeds it as a trailing comment on every generated line, so the readable label always sits beside the binary value.
-- **No runtime parsing liability** — the value is already a literal in your generated code; forge parsed it at codegen time. Your binary never parses a UUID string at startup unless *you* hand it one — no startup hashing, no parse-error branch, no cross-language library-version skew.
+- **No runtime parsing** — the value is already a literal in your generated code; forge parsed it at codegen time. Your binary never parses a UUID string at startup unless *you* hand it one — no startup hashing, no parse-error branch, no cross-language library-version skew.
 
-For the canonicalization rules (URL-mode parsing, acronym preservation, homophone folding, edit-chain arithmetic) and the Base32 alphabet rationale, see the [`tag` package README](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md).
+For the canonicalization and parsing rules (URL-mode parsing, acronym preservation) and the Base32 alphabet rationale, see the [`tag` package README](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md).
 
 ## See It Yourself
 
@@ -203,7 +208,7 @@ The repo's golden test exercises every grammar feature — tag hierarchies, UUID
 
 - **Hierarchical namespaces** — names nest in the source, producing dot-paths like `server.region.east` that compile to typed constants with stable UIDs.
 - **UUID literals** — paste an existing UUID (`"550e8400-..."`) as a `uid` value and forge bakes it into typed constants in every target language.
-- **Mixed-type const groups** — strings, integers (`int32`/`int64`/`uint32`/`uint64`), floats (`float32`/`float64`), hex literals, and explicit UID pairs in one file.
+- **Mixed-type const groups** — strings, integers (`int32`/`int64`/`uint32`/`uint64`/`fixed64`), floats (`float32`/`float64`), hex literals, and explicit UID pairs in one file.
 - **Comment preservation** — leading and trailing source comments carry through to every language with idiomatic formatting.
 - **Column-aligned output** — generated files are diff-friendly and pleasant to read.
 
