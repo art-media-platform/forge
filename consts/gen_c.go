@@ -25,9 +25,9 @@ func (CEmitter) Info() EmitterInfo {
 // other targets.  Loose top-level consts fold into a single `Const` struct,
 // mirroring the C# emitter.
 //
-// The UID/TagName types have no amp tag runtime, so they're emitted inline,
+// The TagUID/TagName types have no amp tag runtime, so they're emitted inline,
 // guarded by FORGE_CONSTS_TYPES so several forge headers can be included in one
-// translation unit.  64-bit UID halves require <stdint.h>, which is C99 — there
+// translation unit.  64-bit TagUID halves require <stdint.h>, which is C99 — there
 // is no portable pre-C99 64-bit integer type — so the output targets C99.
 func GenerateC(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	if opts == nil {
@@ -77,8 +77,8 @@ func GenerateC(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	}
 
 	// Self-contained types, guarded once across all forge headers in a TU.  Both
-	// UID and TagName are always defined together so a second header that needs
-	// TagName still finds it even if the first only needed UID.
+	// TagUID and TagName are always defined together so a second header that needs
+	// TagName still finds it even if the first only needed TagUID.
 	if decls.needsUID() {
 		buf.WriteString(`
 #ifndef FORGE_CONSTS_TYPES
@@ -87,10 +87,10 @@ func GenerateC(src *ConstFile, opts *GenOpts) ([]byte, error) {
 typedef struct {
     uint64_t hi;
     uint64_t lo;
-} UID;
+} TagUID;
 
 typedef struct {
-    UID         id;
+    TagUID      id;
     const char *canonic;
 } TagName;
 
@@ -280,7 +280,7 @@ func cScalarType(typeName string) string {
 	case "float64", "double":
 		return "double"
 	case "uid":
-		return "UID"
+		return "TagUID"
 	default:
 		return typeName
 	}

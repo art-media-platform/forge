@@ -20,10 +20,10 @@
 typedef struct {
     uint64_t hi;
     uint64_t lo;
-} UID;
+} TagUID;
 
 typedef struct {
-    UID         id;
+    TagUID      id;
     const char *canonic;
 } TagName;
 
@@ -105,7 +105,7 @@ static const struct {
 // literals in const blocks).  Flat-prefixed by the group name — access is
 // `std.SessionContextID` + `std.SessionLaunchPath`.
 static const struct {
-    UID         ContextID;
+    TagUID      ContextID;
     const char *LaunchPath;
 } Session FORGE_UNUSED = {
     .ContextID  = { 0x0, 0x777 },
@@ -118,16 +118,16 @@ static const struct {
     double   Pi;
     float    SmallPi;
     double   TwoPi;
-    UID      TestingID;
-    UID      UUID_Canonical;
-    UID      UUID_Uppercase;
-    UID      UUID_Compact;
-    UID      UUID_Braced;
-    UID      UUID_URN;
-    UID      UUID_MixedCase;
-    UID      UUID_Nil;
-    UID      UUID_Max;
-    UID      HiMom;
+    TagUID   TestingID;
+    TagUID   UUID_Canonical;
+    TagUID   UUID_Uppercase;
+    TagUID   UUID_Compact;
+    TagUID   UUID_Braced;
+    TagUID   UUID_URN;
+    TagUID   UUID_MixedCase;
+    TagUID   UUID_Nil;
+    TagUID   UUID_Max;
+    TagUID   HiMom;
 } Const FORGE_UNUSED = {
     // Scalar string constants
     .MaxFraction    = 1000000000ULL,
