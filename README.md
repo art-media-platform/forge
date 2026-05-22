@@ -221,7 +221,7 @@ go install github.com/art-media-platform/forge/cmd/forge@latest
 Or run pinned without installing:
 
 ```
-go run github.com/art-media-platform/forge/cmd/forge@v0.2.0 consts ...
+go run github.com/art-media-platform/forge/cmd/forge@v0.3.0 consts ...
 ```
 
 ## CLI
