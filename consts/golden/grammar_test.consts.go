@@ -18,18 +18,18 @@ var Name = struct {
 	// ─── This is a big fancy comment, ───────────────────────────────
 	AppTag: tag.Name{ID: tag.UID{0x9FC2012FD63F847A, 0x51AA55A31D90CD25}, Canonic: "app"}, // 4ZS80KZPJZHJX53BKPNDFT1M95
 
-	AppState: tag.Name{ID: tag.UID{0xB0E0A1DFE9CF1CE2, 0x6D372EA4CD284F8D}, Canonic: "app.state"}, // 5HW2HXZUFG3MJ6UETFNM6KHMWE
+	AppState: tag.Name{ID: tag.UID{0xFAA5BBA978628672, 0x22BC2C65BFDD460C}, Canonic: "app.state"}, // 7UNQXUKY32HTT25G1DDQZXUJHD
 
 	// ─── This is a very descriptive comment ─────────────────────────
 	// that spans multiple lines to exercise
 	// the multi-line doc-comment code path.
 	SessionAttr: tag.Name{ID: tag.UID{0x5948CA6969CBDF2F, 0x01C92A44FA60AB24}, Canonic: "session"}, // 2T9356KUFCVWRH3K9B8MX61BT4
 
-	LoginID:    tag.Name{ID: tag.UID{0xCC1664C727510447, 0xFBE5F2B6BC492F9D}, Canonic: "session.login"}, // 6D2TKDF9UJ0J3ZRTGKQUY4KCWX
-	SessionTag: tag.Name{ID: tag.UID{0x0F2E0253AA120335, 0x4355B536D92A8B5A}, Canonic: "session.tag"},   // 0G5S157BHK0DUN6PEP6VDKP2UU
+	LoginID:    tag.Name{ID: tag.UID{0x761CD041F19A871E, 0x588D714F3B7C0369}, Canonic: "session.login"}, // 3Q3M843WDUHWG5J3CJ9WXRS0V9
+	SessionTag: tag.Name{ID: tag.UID{0xCCE00314A1263502, 0x7A38CD68C10DC759}, Canonic: "session.tag"},   // 6DW01J98966N17NF6EE30HVJUT
 
-	LaunchWeb:           tag.Name{ID: tag.UID{0x972CEB01661BA7F5, 0xC8E19B9BC9291F22}, Canonic: "session.tag.www"},                 // 4R5MPH2THVNZUWJSDVMG4KK7T2
-	ReallySuperLongName: tag.Name{ID: tag.UID{0xAC9496188C89AB63, 0xF81E6F8687799949}, Canonic: "session.tag.reallysuperlongname"}, // 5DKKC1J349PEJZH7MGHU3RM6B9
+	LaunchWeb:           tag.Name{ID: tag.UID{0x7900A4A514A3C61B, 0x69753310BD7BA8BB}, Canonic: "session.tag.www"},                 // 3T02KBB553SSEQKX9M22YRRB5V
+	ReallySuperLongName: tag.Name{ID: tag.UID{0xDB93E07BBD0F0827, 0xCA42D43B008D32CC}, Canonic: "session.tag.reallysuperlongname"}, // 6VKGH7RG8G10MWNHQN7D08UDQD
 }
 
 var ID = struct {
@@ -39,7 +39,7 @@ var ID = struct {
 }{
 	SiteDownloads: tag.Name{ID: tag.UID{0xB30A33823CA36F9E, 0x379DE2617633209C}, Canonic: "http://acme.com/downloads/"},          // 5M18TS4G53EYG3G7G2D5V3684W
 	TestNet:       tag.Name{ID: tag.UID{0x46407EE5F0A5436F, 0xDC383E0601E3386A}, Canonic: "your-scheme://server.com:23382/path"}, // 2681ZFCW558ERXSF1Y0S0Y6F3B
-	BestShow:      tag.Name{ID: tag.UID{0x57B2E51533698C3F, 0x78FFA34D801D6675}, Canonic: "fraggle.rock"},                        // 2RQCKJBDV9JHZRJZX39Q01UTMP
+	BestShow:      tag.Name{ID: tag.UID{0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41}, Canonic: "fraggle.rock"},                        // 4UM6X267RSS5467P59Q3G7UZU1
 }
 
 var (

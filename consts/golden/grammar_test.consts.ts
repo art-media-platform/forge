@@ -13,24 +13,24 @@ export const Name = {
     // ─── This is a big fancy comment, ───────────────────────────────
     AppTag             : { id: [0x9FC2012FD63F847An, 0x51AA55A31D90CD25n], canonic: "app" },        // 4ZS80KZPJZHJX53BKPNDFT1M95
 
-    AppState           : { id: [0xB0E0A1DFE9CF1CE2n, 0x6D372EA4CD284F8Dn], canonic: "app.state" },  // 5HW2HXZUFG3MJ6UETFNM6KHMWE
+    AppState           : { id: [0xFAA5BBA978628672n, 0x22BC2C65BFDD460Cn], canonic: "app.state" },  // 7UNQXUKY32HTT25G1DDQZXUJHD
 
     // ─── This is a very descriptive comment ─────────────────────────
     // that spans multiple lines to exercise
     // the multi-line doc-comment code path.
     SessionAttr        : { id: [0x5948CA6969CBDF2Fn, 0x01C92A44FA60AB24n], canonic: "session" },                          // 2T9356KUFCVWRH3K9B8MX61BT4
 
-    LoginID            : { id: [0xCC1664C727510447n, 0xFBE5F2B6BC492F9Dn], canonic: "session.login" },                    // 6D2TKDF9UJ0J3ZRTGKQUY4KCWX
-    SessionTag         : { id: [0x0F2E0253AA120335n, 0x4355B536D92A8B5An], canonic: "session.tag" },                      // 0G5S157BHK0DUN6PEP6VDKP2UU
+    LoginID            : { id: [0x761CD041F19A871En, 0x588D714F3B7C0369n], canonic: "session.login" },                    // 3Q3M843WDUHWG5J3CJ9WXRS0V9
+    SessionTag         : { id: [0xCCE00314A1263502n, 0x7A38CD68C10DC759n], canonic: "session.tag" },                      // 6DW01J98966N17NF6EE30HVJUT
 
-    LaunchWeb          : { id: [0x972CEB01661BA7F5n, 0xC8E19B9BC9291F22n], canonic: "session.tag.www" },                  // 4R5MPH2THVNZUWJSDVMG4KK7T2
-    ReallySuperLongName: { id: [0xAC9496188C89AB63n, 0xF81E6F8687799949n], canonic: "session.tag.reallysuperlongname" },  // 5DKKC1J349PEJZH7MGHU3RM6B9
+    LaunchWeb          : { id: [0x7900A4A514A3C61Bn, 0x69753310BD7BA8BBn], canonic: "session.tag.www" },                  // 3T02KBB553SSEQKX9M22YRRB5V
+    ReallySuperLongName: { id: [0xDB93E07BBD0F0827n, 0xCA42D43B008D32CCn], canonic: "session.tag.reallysuperlongname" },  // 6VKGH7RG8G10MWNHQN7D08UDQD
 } satisfies Record<string, TagName>;
 
 export const ID = {
     SiteDownloads: { id: [0xB30A33823CA36F9En, 0x379DE2617633209Cn], canonic: "http://acme.com/downloads/" },  // 5M18TS4G53EYG3G7G2D5V3684W
     TestNet      : { id: [0x46407EE5F0A5436Fn, 0xDC383E0601E3386An], canonic: "your-scheme://server.com:23382/path" },  // 2681ZFCW558ERXSF1Y0S0Y6F3B
-    BestShow     : { id: [0x57B2E51533698C3Fn, 0x78FFA34D801D6675n], canonic: "fraggle.rock" },  // 2RQCKJBDV9JHZRJZX39Q01UTMP
+    BestShow     : { id: [0x9A99BA231EF8C148n, 0x63D4A9B0DE7D7F41n], canonic: "fraggle.rock" },  // 4UM6X267RSS5467P59Q3G7UZU1
 } satisfies Record<string, TagName>;
 
 // Bootstrapping node ID
