@@ -6,8 +6,8 @@ github.com/alecthomas/participle/v2 v2.1.4 h1:W/H79S8Sat/krZ3el6sQMvMaahJ+XcM9WS
 github.com/alecthomas/participle/v2 v2.1.4/go.mod h1:8tqVbpTX20Ru4NfYQgZf4mP18eXPTBViyMWiArNEgGI=
 github.com/alecthomas/repr v0.5.2 h1:SU73FTI9D1P5UNtvseffFSGmdNci/O6RsqzeXJtP0Qs=
 github.com/alecthomas/repr v0.5.2/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
-github.com/art-media-platform/amp.SDK v0.230.0 h1:Y1dPsOhUMZ5QKxsvVe3iUhetkW489TlArjEr+NMXFrc=
-github.com/art-media-platform/amp.SDK v0.230.0/go.mod h1:1LheWSu4/UGCo86sjT8Yy5KdJKpXsy4u691rqPZ3QdE=
+github.com/art-media-platform/amp.SDK v0.233.0 h1:vVJWE2z06cj88UFYFy32noluIvxcdcODs8rVJj3BLks=
+github.com/art-media-platform/amp.SDK v0.233.0/go.mod h1:UHULvor18JS5w2wBuuJ/GjMD5I30fuAH83Am3wrptWk=
 github.com/gofrs/uuid/v5 v5.4.0 h1:EfbpCTjqMuGyq5ZJwxqzn3Cbr2d0rUZU7v5ycAk/e/0=
 github.com/gofrs/uuid/v5 v5.4.0/go.mod h1:CDOjlDMVAtN56jqyRUZh58JT31Tiw7/oQyEXZV+9bD8=
 github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=

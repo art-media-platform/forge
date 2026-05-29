@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	github.com/alecthomas/kong v1.15.0
 	github.com/alecthomas/participle/v2 v2.1.4
-	github.com/art-media-platform/amp.SDK v0.231.0
+	github.com/art-media-platform/amp.SDK v0.233.0
 	github.com/gofrs/uuid/v5 v5.4.0
 )
 
