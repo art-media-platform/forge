@@ -159,10 +159,7 @@ func sectionDivider(text string) string {
 	suffix := " "
 	content := prefix + text + suffix
 	contentWidth := utf8.RuneCountInString(content)
-	remaining := sectionRuleWidth - contentWidth
-	if remaining < 3 {
-		remaining = 3
-	}
+	remaining := max(sectionRuleWidth-contentWidth, 3)
 	return content + strings.Repeat("─", remaining)
 }
 
