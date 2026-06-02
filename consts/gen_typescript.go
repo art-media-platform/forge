@@ -44,8 +44,8 @@ func GenerateTypeScript(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	}
 	if decls.needsTagName() {
 		buf.WriteString("\nexport interface TagName {\n")
-		buf.WriteString("    readonly id:      UID;\n")
-		buf.WriteString("    readonly canonic: string;\n")
+		buf.WriteString("    readonly id:   UID;\n")
+		buf.WriteString("    readonly text: string;\n")
 		buf.WriteString("}\n")
 	}
 
@@ -150,7 +150,7 @@ func emitTSTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 // tsTagExpr builds the TypeScript TagName record for a tag entry.
 // All entries emit as pre-computed literals.
 func tsTagExpr(entry *resolvedEntry) string {
-	return fmt.Sprintf("{ id: [0x%016Xn, 0x%016Xn], canonic: %q }", entry.uidHi, entry.uidLo, entry.canonic)
+	return fmt.Sprintf("{ id: [0x%016Xn, 0x%016Xn], text: %q }", entry.uidHi, entry.uidLo, entry.text)
 }
 
 // emitTSExports writes a run of top-level `export const` declarations with an

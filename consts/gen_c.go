@@ -91,7 +91,7 @@ typedef struct {
 
 typedef struct {
     TagUID      id;
-    const char *canonic;
+    const char *text;
 } TagName;
 
 #endif // FORGE_CONSTS_TYPES
@@ -192,7 +192,7 @@ func emitCTagSection(buf *strings.Builder, sec *tagSection, maxName int) {
 
 // cTagExpr builds the C TagName initializer for a tag entry.
 func cTagExpr(entry *resolvedEntry) string {
-	return fmt.Sprintf("{ { 0x%016X, 0x%016X }, %s }", entry.uidHi, entry.uidLo, cQuote(entry.canonic))
+	return fmt.Sprintf("{ { 0x%016X, 0x%016X }, %s }", entry.uidHi, entry.uidLo, cQuote(entry.text))
 }
 
 // emitCConstStruct writes a struct instance of scalar / UID constants, used for

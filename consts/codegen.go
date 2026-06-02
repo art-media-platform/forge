@@ -77,7 +77,7 @@ func (decls declSet) needsUID() bool {
 type resolvedEntry struct {
 	varName string
 	literal string // the "literal" from the .consts.sdl source
-	canonic string // dot-delimited canonic path
+	text    string // case-preserved dot-delimited tag expression
 	base32  string // 27-char Crockford Base32 UID
 	uidHi   uint64 // pre-computed UID[0]
 	uidLo   uint64 // pre-computed UID[1]
@@ -132,7 +132,7 @@ func resolveTagEntries(entries []*TagEntry, parentName tag.Name) []resolvedEntry
 		result = append(result, resolvedEntry{
 			varName:      entry.VarName,
 			literal:      entry.Literal,
-			canonic:      entryName.Canonic,
+			text:         entryName.Text,
 			base32:       uid.Base32(),
 			uidHi:        uid[0],
 			uidLo:        uid[1],

@@ -8,8 +8,8 @@ UID = tuple[int, int]
 
 
 class TagName(NamedTuple):
-    id:      UID
-    canonic: str
+    id:   UID
+    text: str
 
 
 class Name:
@@ -23,17 +23,17 @@ class Name:
     # the multi-line doc-comment code path.
     SessionAttr         = TagName((0x5948CA6969CBDF2F, 0x01C92A44FA60AB24), "session")                          # 2T9356KUFCVWRH3K9B8MX61BT4
 
-    LoginID             = TagName((0x761CD041F19A871E, 0x588D714F3B7C0369), "session.login")                    # 3Q3M843WDUHWG5J3CJ9WXRS0V9
-    SessionTag          = TagName((0xCCE00314A1263502, 0x7A38CD68C10DC759), "session.tag")                      # 6DW01J98966N17NF6EE30HVJUT
+    LoginID             = TagName((0x761CD041F19A871E, 0x588D714F3B7C0369), "session.Login")                    # 3Q3M843WDUHWG5J3CJ9WXRS0V9
+    SessionTag          = TagName((0xCCE00314A1263502, 0x7A38CD68C10DC759), "session.Tag")                      # 6DW01J98966N17NF6EE30HVJUT
 
-    LaunchWeb           = TagName((0x7900A4A514A3C61B, 0x69753310BD7BA8BB), "session.tag.www")                  # 3T02KBB553SSEQKX9M22YRRB5V
-    ReallySuperLongName = TagName((0xDB93E07BBD0F0827, 0xCA42D43B008D32CC), "session.tag.reallysuperlongname")  # 6VKGH7RG8G10MWNHQN7D08UDQD
+    LaunchWeb           = TagName((0x7900A4A514A3C61B, 0x69753310BD7BA8BB), "session.Tag.www")                  # 3T02KBB553SSEQKX9M22YRRB5V
+    ReallySuperLongName = TagName((0xDB93E07BBD0F0827, 0xCA42D43B008D32CC), "session.Tag.ReallySuperLongName")  # 6VKGH7RG8G10MWNHQN7D08UDQD
 
 
 class ID:
     SiteDownloads = TagName((0xB30A33823CA36F9E, 0x379DE2617633209C), "http://acme.com/downloads/")  # 5M18TS4G53EYG3G7G2D5V3684W
     TestNet       = TagName((0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path")  # 2681ZFCW558ERXSF1Y0S0Y6F3B
-    BestShow      = TagName((0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41), "fraggle.rock")  # 4UM6X267RSS5467P59Q3G7UZU1
+    BestShow      = TagName((0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41), "Fraggle.Rock")  # 4UM6X267RSS5467P59Q3G7UZU1
 
 
 # Bootstrapping node ID

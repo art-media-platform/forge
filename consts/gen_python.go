@@ -47,8 +47,8 @@ func GeneratePython(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	}
 	if decls.needsTagName() {
 		buf.WriteString("\n\nclass TagName(NamedTuple):\n")
-		buf.WriteString("    id:      UID\n")
-		buf.WriteString("    canonic: str\n")
+		buf.WriteString("    id:   UID\n")
+		buf.WriteString("    text: str\n")
 	}
 
 	for _, tb := range decls.Tags {
@@ -151,7 +151,7 @@ func emitPyClassSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 // pyTagExpr builds the Python TagName record for a tag entry.
 // All entries emit as pre-computed literals.
 func pyTagExpr(entry *resolvedEntry) string {
-	return fmt.Sprintf("TagName((0x%016X, 0x%016X), %q)", entry.uidHi, entry.uidLo, entry.canonic)
+	return fmt.Sprintf("TagName((0x%016X, 0x%016X), %q)", entry.uidHi, entry.uidLo, entry.text)
 }
 
 // emitPyConsts writes a module-level run of annotated constant assignments with

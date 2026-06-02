@@ -129,10 +129,10 @@ func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 		emitSectionHeader(buf, sec.comment, indent+"// ")
 	}
 
-	// Tag entries are always `static readonly TagName` (a struct ctor is not a
+	// Tag entries are always `static readonly Name` (a struct ctor is not a
 	// compile-time constant, so they can't be `const`).
 	expr := func(entry *resolvedEntry) string {
-		return "public static readonly TagName " + padRight(entry.varName, maxVar) + " = " + csTagExpr(entry) + ";"
+		return "public static readonly Name " + padRight(entry.varName, maxVar) + " = " + csTagExpr(entry) + ";"
 	}
 
 	// First pass: measure code column width for trailing-comment alignment
@@ -143,7 +143,7 @@ func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 		}
 	}
 
-	// Second pass: emit aligned entries (canonic is in the literal; the trailing
+	// Second pass: emit aligned entries (text is in the literal; the trailing
 	// comment is just Base32)
 	for i := range sec.entries {
 		entry := &sec.entries[i]
@@ -162,9 +162,9 @@ func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 	}
 }
 
-// csTagExpr builds the C# TagName expression for a tag entry.
+// csTagExpr builds the C# Name expression for a tag entry.
 func csTagExpr(entry *resolvedEntry) string {
-	return fmt.Sprintf("new(new(0x%016X, 0x%016X), %s)", entry.uidHi, entry.uidLo, csharpQuote(entry.canonic))
+	return fmt.Sprintf("new(new(0x%016X, 0x%016X), %s)", entry.uidHi, entry.uidLo, csharpQuote(entry.text))
 }
 
 // emitCSharpConstClass writes a partial class of scalar / UID constants.

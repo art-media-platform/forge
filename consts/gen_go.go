@@ -152,7 +152,7 @@ func emitGoTagSection(buf *strings.Builder, sec *tagSection) {
 			}
 		}
 
-		// canonic is visible in the literal; the trailing comment is just Base32.
+		// text is visible in the literal; the trailing comment is just Base32.
 		buf.WriteString("\t" + entry.varName + ": " + goTagExpr(&entry) + ",  // " + entry.base32 + "\n")
 
 		// Visual break after parent entries (children follow)
@@ -202,7 +202,7 @@ func emitGoVarBlock(buf *strings.Builder, decls []*ConstDecl, groupPrefix string
 // goTagExpr builds the Go expression for a tag entry.
 // All entries emit as tag.Name with pre-computed literals.
 func goTagExpr(entry *resolvedEntry) string {
-	return fmt.Sprintf("tag.Name{ID: tag.UID{0x%016X, 0x%016X}, Canonic: %s}", entry.uidHi, entry.uidLo, goQuote(entry.canonic))
+	return fmt.Sprintf("tag.Name{ID: tag.UID{0x%016X, 0x%016X}, Text: %s}", entry.uidHi, entry.uidLo, goQuote(entry.text))
 }
 
 // emitGoConstBlock writes a const () block for scalar constants.
