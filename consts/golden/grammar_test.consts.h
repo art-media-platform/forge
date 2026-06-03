@@ -39,20 +39,20 @@ static const struct {
     TagName ReallySuperLongName;
 } Name FORGE_UNUSED = {
     // ─── This is a big fancy comment, ───────────────────────────────
-    .AppTag              = { { 0x9FC2012FD63F847A, 0x51AA55A31D90CD25 }, "app" },        // 4ZS80KZPJZHJX53BKPNDFT1M95
+    .AppTag              = { { 0x9FC2012FD63F847A, 0x51AA55A31D90CD25 }, "app" },        // 4zs80kzpjzhjx53bkpndft1m95
 
-    .AppState            = { { 0xFAA5BBA978628672, 0x22BC2C65BFDD460C }, "app.state" },  // 7UNQXUKY32HTT25G1DDQZXUJHD
+    .AppState            = { { 0xFAA5BBA978628672, 0x22BC2C65BFDD460C }, "app.state" },  // 7unqxuky32htt25g1ddqzxujhd
 
     // ─── This is a very descriptive comment ─────────────────────────
     // that spans multiple lines to exercise
     // the multi-line doc-comment code path.
-    .SessionAttr         = { { 0x5948CA6969CBDF2F, 0x01C92A44FA60AB24 }, "session" },                          // 2T9356KUFCVWRH3K9B8MX61BT4
+    .SessionAttr         = { { 0x5948CA6969CBDF2F, 0x01C92A44FA60AB24 }, "session" },                          // 2t9356kufcvwrh3k9b8mx61bt4
 
-    .LoginID             = { { 0x761CD041F19A871E, 0x588D714F3B7C0369 }, "session.Login" },                    // 3Q3M843WDUHWG5J3CJ9WXRS0V9
-    .SessionTag          = { { 0xCCE00314A1263502, 0x7A38CD68C10DC759 }, "session.Tag" },                      // 6DW01J98966N17NF6EE30HVJUT
+    .LoginID             = { { 0x761CD041F19A871E, 0x588D714F3B7C0369 }, "session.Login" },                    // 3q3m843wduhwg5j3cj9wxrs0v9
+    .SessionTag          = { { 0xCCE00314A1263502, 0x7A38CD68C10DC759 }, "session.Tag" },                      // 6dw01j98966n17nf6ee30hvjut
 
-    .LaunchWeb           = { { 0x7900A4A514A3C61B, 0x69753310BD7BA8BB }, "session.Tag.www" },                  // 3T02KBB553SSEQKX9M22YRRB5V
-    .ReallySuperLongName = { { 0xDB93E07BBD0F0827, 0xCA42D43B008D32CC }, "session.Tag.ReallySuperLongName" },  // 6VKGH7RG8G10MWNHQN7D08UDQD
+    .LaunchWeb           = { { 0x7900A4A514A3C61B, 0x69753310BD7BA8BB }, "session.Tag.www" },                  // 3t02kbb553sseqkx9m22yrrb5v
+    .ReallySuperLongName = { { 0xDB93E07BBD0F0827, 0xCA42D43B008D32CC }, "session.Tag.ReallySuperLongName" },  // 6vkgh7rg8g10mwnhqn7d08udqd
 };
 
 static const struct {
@@ -60,9 +60,9 @@ static const struct {
     TagName TestNet;
     TagName BestShow;
 } ID FORGE_UNUSED = {
-    .SiteDownloads = { { 0xB30A33823CA36F9E, 0x379DE2617633209C }, "http://acme.com/downloads/" },  // 5M18TS4G53EYG3G7G2D5V3684W
-    .TestNet       = { { 0x46407EE5F0A5436F, 0xDC383E0601E3386A }, "your-scheme://server.com:23382/path" },  // 2681ZFCW558ERXSF1Y0S0Y6F3B
-    .BestShow      = { { 0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41 }, "Fraggle.Rock" },  // 4UM6X267RSS5467P59Q3G7UZU1
+    .SiteDownloads = { { 0xB30A33823CA36F9E, 0x379DE2617633209C }, "http://acme.com/downloads/" },  // 5m18ts4g53eyg3g7g2d5v3684w
+    .TestNet       = { { 0x46407EE5F0A5436F, 0xDC383E0601E3386A }, "your-scheme://server.com:23382/path" },  // 2681zfcw558erxsf1y0s0y6f3b
+    .BestShow      = { { 0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41 }, "Fraggle.Rock" },  // 4um6x267rss5467p59q3g7uzu1
 };
 
 static const struct {

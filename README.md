@@ -1,6 +1,6 @@
 # forge
 
-A codegen tool for **cross-language string and numerical constants** — the kind that need to stay byte-identical between Go, C#, TypeScript, Python, C, and other languages, with deterministic IDs that never drift across rebuilds.  PRs for other languages happily accepted.
+A codegen tool for **cross-language string and numerical constants** — the kind that need to stay byte-identical between Go, C#, TypeScript, Python, C, and other languages, with deterministic IDs that never drift across rebuilds.  PRs for fixes and other languages are encouraged.
 
 ## The Problem
 
