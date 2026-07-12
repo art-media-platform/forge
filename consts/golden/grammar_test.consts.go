@@ -16,20 +16,20 @@ var Name = struct {
 	ReallySuperLongName tag.Name
 }{
 	// ─── This is a big fancy comment, ───────────────────────────────
-	AppTag: tag.Name{ID: tag.UID{0x9FC2012FD63F847A, 0x51AA55A31D90CD25}, Text: "app"}, // 4zs80kzpjzhjx53bkpndft1m95
+	AppTag: tag.Name{ID: tag.UID{0x9FC2012FD63F847A, 0x51AA55A31D90CD25}, Text: "app"}, // 4zs80k-zpjzh-jx53b-kpndf-t1m95
 
-	AppState: tag.Name{ID: tag.UID{0xFAA5BBA978628672, 0x22BC2C65BFDD460C}, Text: "app.state"}, // 7unqxuky32htt25g1ddqzxujhd
+	AppState: tag.Name{ID: tag.UID{0xFAA5BBA978628672, 0x22BC2C65BFDD460C}, Text: "app.state"}, // 7unqxu-ky32h-tt25g-1ddqz-xujhd
 
 	// ─── This is a very descriptive comment ─────────────────────────
 	// that spans multiple lines to exercise
 	// the multi-line doc-comment code path.
-	SessionAttr: tag.Name{ID: tag.UID{0x5948CA6969CBDF2F, 0x01C92A44FA60AB24}, Text: "session"}, // 2t9356kufcvwrh3k9b8mx61bt4
+	SessionAttr: tag.Name{ID: tag.UID{0x5948CA6969CBDF2F, 0x01C92A44FA60AB24}, Text: "session"}, // 2t9356-kufcv-wrh3k-9b8mx-61bt4
 
-	LoginID:    tag.Name{ID: tag.UID{0x761CD041F19A871E, 0x588D714F3B7C0369}, Text: "session.Login"}, // 3q3m843wduhwg5j3cj9wxrs0v9
-	SessionTag: tag.Name{ID: tag.UID{0xCCE00314A1263502, 0x7A38CD68C10DC759}, Text: "session.Tag"},   // 6dw01j98966n17nf6ee30hvjut
+	LoginID:    tag.Name{ID: tag.UID{0x761CD041F19A871E, 0x588D714F3B7C0369}, Text: "session.Login"}, // 3q3m84-3wduh-wg5j3-cj9wx-rs0v9
+	SessionTag: tag.Name{ID: tag.UID{0xCCE00314A1263502, 0x7A38CD68C10DC759}, Text: "session.Tag"},   // 6dw01j-98966-n17nf-6ee30-hvjut
 
-	LaunchWeb:           tag.Name{ID: tag.UID{0x7900A4A514A3C61B, 0x69753310BD7BA8BB}, Text: "session.Tag.www"},                 // 3t02kbb553sseqkx9m22yrrb5v
-	ReallySuperLongName: tag.Name{ID: tag.UID{0xDB93E07BBD0F0827, 0xCA42D43B008D32CC}, Text: "session.Tag.ReallySuperLongName"}, // 6vkgh7rg8g10mwnhqn7d08udqd
+	LaunchWeb:           tag.Name{ID: tag.UID{0x7900A4A514A3C61B, 0x69753310BD7BA8BB}, Text: "session.Tag.www"},                 // 3t02kb-b553s-seqkx-9m22y-rrb5v
+	ReallySuperLongName: tag.Name{ID: tag.UID{0xDB93E07BBD0F0827, 0xCA42D43B008D32CC}, Text: "session.Tag.ReallySuperLongName"}, // 6vkgh7-rg8g1-0mwnh-qn7d0-8udqd
 }
 
 var ID = struct {
@@ -37,9 +37,9 @@ var ID = struct {
 	TestNet       tag.Name
 	BestShow      tag.Name
 }{
-	SiteDownloads: tag.Name{ID: tag.UID{0xB30A33823CA36F9E, 0x379DE2617633209C}, Text: "http://acme.com/downloads/"},          // 5m18ts4g53eyg3g7g2d5v3684w
-	TestNet:       tag.Name{ID: tag.UID{0x46407EE5F0A5436F, 0xDC383E0601E3386A}, Text: "your-scheme://server.com:23382/path"}, // 2681zfcw558erxsf1y0s0y6f3b
-	BestShow:      tag.Name{ID: tag.UID{0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41}, Text: "Fraggle.Rock"},                        // 4um6x267rss5467p59q3g7uzu1
+	SiteDownloads: tag.Name{ID: tag.UID{0xB30A33823CA36F9E, 0x379DE2617633209C}, Text: "http://acme.com/downloads/"},          // 5m18ts-4g53e-yg3g7-g2d5v-3684w
+	TestNet:       tag.Name{ID: tag.UID{0x46407EE5F0A5436F, 0xDC383E0601E3386A}, Text: "your-scheme://server.com:23382/path"}, // 2681zf-cw558-erxsf-1y0s0-y6f3b
+	BestShow:      tag.Name{ID: tag.UID{0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41}, Text: "Fraggle.Rock"},                        // 4um6x2-67rss-5467p-59q3g-7uzu1
 }
 
 var (
