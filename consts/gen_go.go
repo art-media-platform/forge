@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/format"
 	"path"
+	"strconv"
 	"strings"
 )
 
@@ -256,7 +257,7 @@ func goConstValue(typeName string, val *Value) string {
 		case "float32", "float":
 			return fmt.Sprintf("float32(%g)", *val.Float)
 		default:
-			return fmt.Sprintf("%g", *val.Float)
+			return floatLiteral(*val.Float)
 		}
 	}
 	if val.Hex != nil {
@@ -289,4 +290,14 @@ func goConstValue(typeName string, val *Value) string {
 		}
 	}
 	return "nil"
+}
+
+// floatLiteral renders a float64 as an untyped float literal: whole values
+// keep a trailing ".0" so the constant stays a float, never an untyped int.
+func floatLiteral(f float64) string {
+	lit := strconv.FormatFloat(f, 'g', -1, 64)
+	if !strings.ContainsAny(lit, ".eE") {
+		lit += ".0"
+	}
+	return lit
 }

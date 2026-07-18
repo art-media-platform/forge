@@ -270,7 +270,7 @@ func csharpConstValue(typeName string, val *Value) string {
 		case "float32", "float":
 			return fmt.Sprintf("%gf", *val.Float)
 		default:
-			return fmt.Sprintf("%g", *val.Float)
+			return floatLiteral(*val.Float)
 		}
 	}
 	if val.Hex != nil {

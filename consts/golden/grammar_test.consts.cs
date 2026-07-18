@@ -64,6 +64,9 @@ namespace art.media.platform.std {
         public const           double Pi             = 3.14159265358979;
         public const           float  SmallPi        = 3.14f;
         public const           double TwoPi          = 3.14159265358979;
+        public const           double WholeRate      = 1.0;
+        public const           double TinyStep       = 1e-09;
+        public const           float  WholeGain      = 2f;
         // Bootstrapping node ID
         public static readonly UID    TestingID      = new(0x7, 0x8);
         // UUID literals — every form accepted by gofrs/uuid.FromString is normalized

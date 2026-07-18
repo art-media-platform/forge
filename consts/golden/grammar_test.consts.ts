@@ -55,6 +55,9 @@ export const HexConst:    bigint = 0xFFFFFFFFFFFFFFF0n;
 export const Pi:          number = 3.14159265358979;
 export const SmallPi:     number = 3.14;
 export const TwoPi:       number = 3.14159265358979;
+export const WholeRate:   number = 1;
+export const TinyStep:    number = 1e-09;
+export const WholeGain:   number = 2;
 
 export const SomeFiles = {
     WindowsHosts: "C:\\Windows\\System32\\drivers\\etc\\hosts",

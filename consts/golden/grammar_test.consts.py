@@ -59,6 +59,9 @@ HexConst:    int   = 0xFFFFFFFFFFFFFFF0
 Pi:          float = 3.14159265358979
 SmallPi:     float = 3.14
 TwoPi:       float = 3.14159265358979
+WholeRate:   float = 1
+TinyStep:    float = 1e-09
+WholeGain:   float = 2
 
 
 class SomeFiles:

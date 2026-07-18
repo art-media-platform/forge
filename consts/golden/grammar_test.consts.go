@@ -67,6 +67,9 @@ const (
 	Pi          = 3.14159265358979
 	SmallPi     = float32(3.14)
 	TwoPi       = 3.14159265358979
+	WholeRate   = 1.0
+	TinyStep    = 1e-09
+	WholeGain   = float32(2)
 )
 
 const (

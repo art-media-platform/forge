@@ -118,6 +118,9 @@ static const struct {
     double   Pi;
     float    SmallPi;
     double   TwoPi;
+    double   WholeRate;
+    double   TinyStep;
+    float    WholeGain;
     TagUID   TestingID;
     TagUID   UUID_Canonical;
     TagUID   UUID_Uppercase;
@@ -135,6 +138,9 @@ static const struct {
     .Pi             = 3.14159265358979,
     .SmallPi        = 3.14f,
     .TwoPi          = 3.14159265358979,
+    .WholeRate      = 1,
+    .TinyStep       = 1e-09,
+    .WholeGain      = 2f,
     // Bootstrapping node ID
     .TestingID      = { 0x7, 0x8 },
     // UUID literals — every form accepted by gofrs/uuid.FromString is normalized
