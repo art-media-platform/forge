@@ -195,6 +195,15 @@ type Generator struct {
 
 // Run parses the source and writes each emitter whose flag maps to a non-empty
 // directory in OutDirs.
+//
+// A source file may also pin an emitter's output directory itself via an
+// option named after the emitter's flag, resolved relative to the file:
+//
+//	option ts_out = "../../amp-web/src/generated";
+//
+// An explicit OutDirs entry (CLI flag) wins over the option.  The option
+// keeps the path consumer-relative — a worktree checkout generates into
+// itself, never into the primary checkout.
 func (g Generator) Run() error {
 	text, err := os.ReadFile(g.InputPath)
 	if err != nil {
@@ -230,6 +239,12 @@ func (g Generator) Run() error {
 	for _, emitter := range g.Emitters {
 		info := emitter.Info()
 		dir := g.OutDirs[info.Flag]
+		if dir == "" {
+			// Source-pinned output dir, relative to the .consts.sdl file.
+			if optDir := src.GetOption(info.Flag); optDir != "" {
+				dir = filepath.Join(filepath.Dir(g.InputPath), optDir)
+			}
+		}
 		if dir == "" {
 			continue // target not requested
 		}

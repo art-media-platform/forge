@@ -12,6 +12,8 @@
 
 option go_package = "github.com/art-media-platform/amp.SDK/amp/std";
 option csharp_namespace = "art.media.platform.std";
+// Output-dir pinning option (resolved by Generator.Run, inert in emission).
+option ts_out = "";
 
 tags Name {
 
