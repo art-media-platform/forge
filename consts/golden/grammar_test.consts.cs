@@ -5,26 +5,26 @@
 namespace art.media.platform.std {
     public static partial class Name {
         // ─── This is a big fancy comment, ───────────────────────────────
-        public static readonly Name AppTag              = new(new(0x9FC2012FD63F847A, 0x51AA55A31D90CD25), "app");        // 4zs80k-zpjzh-jx53b-kpndf-t1m95
+        public static readonly Name AppTag              = new(new(0x9FC2012FD63F847A, 0x51AA55A31D90CD25), "app");        // 4zs-80kzpjzhjx-53bkpndft1-m95
 
-        public static readonly Name AppState            = new(new(0xFAA5BBA978628672, 0x22BC2C65BFDD460C), "app.state");  // 7unqxu-ky32h-tt25g-1ddqz-xujhd
+        public static readonly Name AppState            = new(new(0xFAA5BBA978628672, 0x22BC2C65BFDD460C), "app.state");  // 7un-qxuky32htt-25g1ddqzxu-jhd
 
         // ─── This is a very descriptive comment ─────────────────────────
         // that spans multiple lines to exercise
         // the multi-line doc-comment code path.
-        public static readonly Name SessionAttr         = new(new(0x5948CA6969CBDF2F, 0x01C92A44FA60AB24), "session");                          // 2t9356-kufcv-wrh3k-9b8mx-61bt4
+        public static readonly Name SessionAttr         = new(new(0x5948CA6969CBDF2F, 0x01C92A44FA60AB24), "session");                          // 2t9-356kufcvwr-h3k9b8mx61-bt4
 
-        public static readonly Name LoginID             = new(new(0x761CD041F19A871E, 0x588D714F3B7C0369), "session.Login");                    // 3q3m84-3wduh-wg5j3-cj9wx-rs0v9
-        public static readonly Name SessionTag          = new(new(0xCCE00314A1263502, 0x7A38CD68C10DC759), "session.Tag");                      // 6dw01j-98966-n17nf-6ee30-hvjut
+        public static readonly Name LoginID             = new(new(0x761CD041F19A871E, 0x588D714F3B7C0369), "session.Login");                    // 3q3-m843wduhwg-5j3cj9wxrs-0v9
+        public static readonly Name SessionTag          = new(new(0xCCE00314A1263502, 0x7A38CD68C10DC759), "session.Tag");                      // 6dw-01j98966n1-7nf6ee30hv-jut
 
-        public static readonly Name LaunchWeb           = new(new(0x7900A4A514A3C61B, 0x69753310BD7BA8BB), "session.Tag.www");                  // 3t02kb-b553s-seqkx-9m22y-rrb5v
-        public static readonly Name ReallySuperLongName = new(new(0xDB93E07BBD0F0827, 0xCA42D43B008D32CC), "session.Tag.ReallySuperLongName");  // 6vkgh7-rg8g1-0mwnh-qn7d0-8udqd
+        public static readonly Name LaunchWeb           = new(new(0x7900A4A514A3C61B, 0x69753310BD7BA8BB), "session.Tag.www");                  // 3t0-2kbb553sse-qkx9m22yrr-b5v
+        public static readonly Name ReallySuperLongName = new(new(0xDB93E07BBD0F0827, 0xCA42D43B008D32CC), "session.Tag.ReallySuperLongName");  // 6vk-gh7rg8g10m-wnhqn7d08u-dqd
     }
 
     public static partial class ID {
-        public static readonly Name SiteDownloads = new(new(0xB30A33823CA36F9E, 0x379DE2617633209C), "http://acme.com/downloads/");  // 5m18ts-4g53e-yg3g7-g2d5v-3684w
-        public static readonly Name TestNet       = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 2681zf-cw558-erxsf-1y0s0-y6f3b
-        public static readonly Name BestShow      = new(new(0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41), "Fraggle.Rock");  // 4um6x2-67rss-5467p-59q3g-7uzu1
+        public static readonly Name SiteDownloads = new(new(0xB30A33823CA36F9E, 0x379DE2617633209C), "http://acme.com/downloads/");  // 5m1-8ts4g53eyg-3g7g2d5v36-84w
+        public static readonly Name TestNet       = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 268-1zfcw558er-xsf1y0s0y6-f3b
+        public static readonly Name BestShow      = new(new(0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41), "Fraggle.Rock");  // 4um-6x267rss54-67p59q3g7u-zu1
     }
 
     public static partial class SomeFiles {
