@@ -227,6 +227,11 @@ the consts it emits registration for every such attr —
   attr → `MessageParser` → `EditFlow`, the decode table display layers read
   through.
 
+- **C# accessors** — a generated `Bind` class exposes one flag-typed
+  accessor per attr: a fold attr yields `FoldBinding<V>`, a tape attr the
+  `TapeBinding<V>`/`TapeTailBinding<V>` pair — consuming a tape through a
+  FoldBinding is uncompilable.
+
 The trailing word resolves against the message types linked into forge from
 its pinned amp.SDK (the type name, Go import path, and `csharp_namespace` all
 come from the generated descriptors).  A TitleCase tail that resolves to **no
@@ -234,13 +239,25 @@ message type fails generation** — a typo'd attr cannot silently skip.  Exempt
 by classification: parent entries (namespaces), lowercase leaves (use-scope
 nodes, item keys, unit tails), `.UID` tails (valueless attrs), any leaf with a
 TitleCase word before the tail (vocabulary members, unit schemas), and
-subtrees declared UID vocabulary via
-`option attr_vocab = "channel.type";` (semicolon-separated roots).
+declared UID vocabulary (below).
 
-An attr whose canonic name carries the reserved `item.series.` literal
-registers as a tape (`EditFlow_Tape`); everything else folds.  Both the tape
-rule and the vocabulary-declaration mechanism are provisional conventions,
-isolated in `consts/attrs.go`.
+**Declared flags** — an optional `: flag[, flag]` postfix on a tag leaf or
+subtree root:
+
+```
+ItemSeries "series" : tape {          // subtree root: children inherit
+    SeriesTRS "TRS"                   // tape (inherited)
+}
+ChannelType "type" : vocab { … }      // UID vocabulary: exempt subtree
+```
+
+`tape` declares `EditFlow_Tape`; `vocab` exempts UID vocabulary (leaves
+whose UIDs are values a Tag resolves to, never AttrIDs); unmarked = fold,
+the universal default.  A per-leaf declaration wins over the inherited one.
+Flags are declaration-site markup only — never hashed, no UID motion.
+Validation is strict: unknown flags, `tape, vocab` together, flags outside
+a `tags Attr` block, and an own `: tape` on a non-attr leaf all fail
+generation.
 
 Because the type universe is forge's pinned amp.SDK, an attr naming a message
 type newer than the pin (or local to a consumer repo) fails generation until

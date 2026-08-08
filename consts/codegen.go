@@ -76,11 +76,13 @@ func (decls declSet) needsUID() bool {
 // All entries are tag.Name — callers use .ID when they need the UID.
 type resolvedEntry struct {
 	varName string
-	literal string // the "literal" from the .consts.sdl source
-	text    string // case-preserved dot-delimited tag expression
-	base32  string // 27-char Crockford Base32 UID
-	uidHi   uint64 // pre-computed UID[0]
-	uidLo   uint64 // pre-computed UID[1]
+	literal string   // the "literal" from the .consts.sdl source
+	text    string   // case-preserved dot-delimited tag expression
+	base32  string   // 27-char Crockford Base32 UID
+	uidHi         uint64   // pre-computed UID[0]
+	uidLo         uint64   // pre-computed UID[1]
+	flags         []string // effective flags: own if declared, else inherited
+	flagsDeclared bool     // entry carries its OWN `: flag` declaration
 
 	leadComment  string // doc comment from source (lines above)
 	trailComment string // inline comment from source (same line)
@@ -97,7 +99,7 @@ type tagSection struct {
 func buildTagSections(entries []*TagEntry) []tagSection {
 	var sections []tagSection
 	for _, entry := range entries {
-		flat := resolveTagEntries([]*TagEntry{entry}, tag.Name{})
+		flat := resolveTagEntries([]*TagEntry{entry}, tag.Name{}, nil)
 		sections = append(sections, tagSection{
 			comment: entry.LeadComment,
 			entries: flat,
@@ -121,28 +123,37 @@ func blankBetweenSections(sections []tagSection, i int) bool {
 }
 
 // resolveTagEntries recursively flattens tag entries into output lines,
-// computing canonic paths and UIDs at codegen time.
+// computing canonic paths and UIDs at codegen time.  parentFlags carries the
+// nearest ancestor's declared flags down the subtree; an entry's own
+// declaration wins wholesale.
 // All entries emit as tag.Name — callers use .ID when they need the bare UID.
-func resolveTagEntries(entries []*TagEntry, parentName tag.Name) []resolvedEntry {
+func resolveTagEntries(entries []*TagEntry, parentName tag.Name, parentFlags []string) []resolvedEntry {
 	var result []resolvedEntry
 	for _, entry := range entries {
 		entryName := parentName.With(entry.Literal)
 		uid := entryName.ID
 
+		flags := parentFlags
+		if len(entry.Flags) > 0 {
+			flags = entry.Flags
+		}
+
 		result = append(result, resolvedEntry{
-			varName:      entry.VarName,
-			literal:      entry.Literal,
-			text:         entryName.Text,
-			base32:       uid.Base32(),
-			uidHi:        uid[0],
-			uidLo:        uid[1],
-			leadComment:  entry.LeadComment,
-			trailComment: entry.TrailComment,
-			isParent:     len(entry.Children) > 0,
+			varName:       entry.VarName,
+			literal:       entry.Literal,
+			text:          entryName.Text,
+			base32:        uid.Base32(),
+			uidHi:         uid[0],
+			uidLo:         uid[1],
+			flags:         flags,
+			flagsDeclared: len(entry.Flags) > 0,
+			leadComment:   entry.LeadComment,
+			trailComment:  entry.TrailComment,
+			isParent:      len(entry.Children) > 0,
 		})
 
 		if len(entry.Children) > 0 {
-			result = append(result, resolveTagEntries(entry.Children, entryName)...)
+			result = append(result, resolveTagEntries(entry.Children, entryName, flags)...)
 		}
 	}
 	return result

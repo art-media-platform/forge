@@ -18,9 +18,6 @@ option go_package = "github.com/art-media-platform/forge/consts/golden";
 option csharp_namespace = "art.media.platform.std";
 // Output-dir pinning option (resolved by Generator.Run, inert in emission).
 option ts_out = "";
-// UID-vocabulary root (ZO §4.8): leaves under it mint value UIDs, never
-// AttrIDs — exempt from the generated attr registration.
-option attr_vocab = "channel.type";
 
 tags Name {
 
@@ -44,21 +41,22 @@ tags Name {
 
 
 // Attr registration (ZO §4.8): a `tags Attr` leaf whose trailing word is a
-// linked message type registers in Go (init) and C# (AttrRegistry); the
-// reserved `item.series.` literal rides tape (provisional).  Parents,
-// lowercase leaves, `.UID` tails, mid-path TitleCase, and attr_vocab
-// subtrees are exempt.
+// linked message type registers in Go (init) and C# (AttrRegistry + Bind
+// accessors).  Declared flags: `: tape` = EditFlow_Tape (subtree root
+// inherits, per-leaf declaration wins), `: vocab` = UID vocabulary
+// (exempt); unmarked = fold.  Parents, lowercase leaves, `.UID` tails, and
+// mid-path TitleCase are structurally exempt.
 tags Attr {
     ItemAttr "item" {
         ItemLabels "Labels"
         ChildLink  "child.link.UID"
-        ItemSeries "series" {
+        ItemSeries "series" : tape {
             SeriesAssetTag "asset.Tag"
             SeriesS2T      "S2.UTC64"
         }
     }
     ChannelAttr "channel" {
-        ChannelType "type" {
+        ChannelType "type" : vocab {
             ChannelTypeSpreadsheet "Spreadsheet"
         }
     }

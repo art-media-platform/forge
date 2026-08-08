@@ -47,11 +47,17 @@ type TagsBlock struct {
 
 // TagEntry is a single tag name declaration, optionally with children.
 // All entries emit as tag.Name / TagName; callers use .ID for the bare UID.
+//
+// Flags are declaration-site markup (`: flag[, flag]` after the literal) —
+// never hashed, never emitted as identity.  In `tags Attr` blocks they
+// declare an attr's storage style (`tape`) or exempt UID vocabulary
+// (`vocab`); a subtree root's flags inherit, a per-leaf declaration wins.
 type TagEntry struct {
 	Pos      lexer.Position
 	IsName   bool        `parser:"@\"name\"?"`
 	VarName  string      `parser:"@Ident"`
 	Literal  string      `parser:"@String"`
+	Flags    []string    `parser:"( \":\" @Ident ( \",\" @Ident )* )?"`
 	Children []*TagEntry `parser:"( \"{\" @@* \"}\" )?"`
 
 	LeadComment  string // populated post-parse (lines above → doc comment)
@@ -113,7 +119,7 @@ var constLexer = lexer.Must(lexer.New(lexer.Rules{
 		{Name: "Int", Pattern: `[-+]?[0-9]+`},
 		{Name: "Ident", Pattern: `[a-zA-Z_]\w*`},
 		{Name: "String", Pattern: `"(\\\d\d\d|\\.|[^"])*"|'(\\\d\d\d|\\.|[^'])*'`},
-		{Name: "Punct", Pattern: `[{}=;,]`},
+		{Name: "Punct", Pattern: `[{}=;,:]`},
 	},
 }))
 

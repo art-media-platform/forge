@@ -106,8 +106,8 @@ namespace art.media.platform.std {
     }
 
     // Every attr above whose trailing name word is a message type appears
-    // here (ZO §4.8).  The tape rule is provisional: an attr carrying the
-    // reserved `item.series.` literal rides EditFlow.Tape.
+    // here (ZO §4.8); a `: tape` flag in the SDL declares EditFlow.Tape,
+    // unmarked attrs fold.
     public static partial class AttrRegistry {
 
         public struct Entry {
@@ -121,5 +121,14 @@ namespace art.media.platform.std {
             new() { Attr = Attr.SeriesAssetTag,    Parser = global::art.media.platform.Tag.Parser, Flow = EditFlow.Tape },
             new() { Attr = Attr.SessionStatusAttr, Parser = global::art.media.platform.status.Status.Parser, Flow = EditFlow.Fold },
         };
+    }
+
+    // Flag-typed accessors: the declared storage style picks the binding
+    // shape at compile time.
+    public static partial class Bind {
+        public static FoldBinding<global::art.media.platform.std.Labels>    ItemLabels()           => new(Attr.ItemLabels);
+        public static TapeBinding<global::art.media.platform.Tag>           SeriesAssetTagWindow() => new(Attr.SeriesAssetTag);
+        public static TapeTailBinding<global::art.media.platform.Tag>       SeriesAssetTagTail()   => new(Attr.SeriesAssetTag);
+        public static FoldBinding<global::art.media.platform.status.Status> SessionStatusAttr()    => new(Attr.SessionStatusAttr);
     }
 }

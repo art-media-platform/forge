@@ -17,24 +17,25 @@ func parseSDL(t *testing.T, body string) *ConstFile {
 
 // The classification contract (ZO §4.8 compiled): leaves with a TitleCase
 // message-type tail register; parents, lowercase leaves, `.UID` tails,
-// mid-path TitleCase (vocabulary members / unit schemas), and declared
-// attr_vocab subtrees never do.
+// mid-path TitleCase (vocabulary members / unit schemas), and `: vocab`
+// leaves/subtrees never do.  `: tape` declares EditFlow_Tape (a subtree
+// root's flags inherit — SeriesLabels below — and inherited tape passing
+// over a unit tail is inert); unmarked folds.
 func TestClassifyAttrs(t *testing.T) {
 	src := parseSDL(t, `
-option attr_vocab = "channel.type";
-
 tags Attr {
     ItemAttr "item" {
         ItemLabels "Labels"
         ChildLink  "child.link.UID"
         TileAttr   "tile"
-        ItemSeries "series" {
-            SeriesAssetTag "asset.Tag"
+        ItemSeries "series" : tape {
+            SeriesAssetTag "asset.Tag" : tape
+            SeriesLabels   "Labels"
             SeriesS2T      "S2.UTC64"
         }
     }
     ChannelAttr "channel" {
-        ChannelType "type" {
+        ChannelType "type" : vocab {
             ChannelTypeSpreadsheet "Spreadsheet"
         }
     }
@@ -61,6 +62,7 @@ tags Crypto {
 	}{
 		"ItemLabels":     {"item.Labels", "Labels", false},
 		"SeriesAssetTag": {"item.series.asset.Tag", "Tag", true},
+		"SeriesLabels":   {"item.series.Labels", "Labels", true},
 	}
 	if len(regs) != len(want) {
 		var got []string
@@ -99,6 +101,49 @@ tags Attr {
 	}
 	if !strings.Contains(err.Error(), "MediaInfoo") || !strings.Contains(err.Error(), "§4.8") {
 		t.Fatalf("error names neither the tail nor §4.8: %v", err)
+	}
+}
+
+// Flag validation is strict: unknown names, `tape, vocab` together, flags
+// outside `tags Attr`, and an OWN `: tape` on a non-attr leaf all fail
+// generation — dead markup cannot sit silently.
+func TestClassifyAttrsFlagValidation(t *testing.T) {
+	cases := []struct {
+		name string
+		sdl  string
+		want string
+	}{
+		{
+			"unknown flag",
+			`tags Attr { ItemAttr "item" { ItemLabels "Labels" : tap } }`,
+			"unknown flag",
+		},
+		{
+			"tape+vocab conflict",
+			`tags Attr { ItemAttr "item" { ItemLabels "Labels" : tape, vocab } }`,
+			"conflict",
+		},
+		{
+			"flag outside tags Attr",
+			`tags Crypto { Poly "amp.crypto.poly" : tape }`,
+			"outside",
+		},
+		{
+			"own tape on a non-attr leaf",
+			`tags Attr { ItemAttr "item" { TileAttr "tile" : tape } }`,
+			"dead markup",
+		},
+	}
+	for _, c := range cases {
+		src := parseSDL(t, c.sdl)
+		_, err := classifyAttrs(src)
+		if err == nil {
+			t.Errorf("%s: accepted", c.name)
+			continue
+		}
+		if !strings.Contains(err.Error(), c.want) {
+			t.Errorf("%s: error %q lacks %q", c.name, err, c.want)
+		}
 	}
 }
 

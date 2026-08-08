@@ -34,12 +34,16 @@ const (
 	sdkPkgRoot  = "github.com/art-media-platform/amp.SDK/"
 )
 
-// attrVocabOption names the .consts.sdl option declaring UID-vocabulary
-// subtrees (ZO §4.8): dotted canonic roots, semicolon-separated.  Leaves
-// under a declared root mint UIDs used as VALUES (a Tag resolves to one),
-// never as AttrIDs, so they are exempt from attr classification even when
-// they fit the attr grammar (e.g. `channel.type.Spreadsheet`).
-const attrVocabOption = "attr_vocab"
+// Declared tag-entry flags (ZO §4.8 markup — astar 08-08: declared SDL
+// markup over convention, "future proof and does not rely on conventions").
+// `tape` declares EditFlow_Tape; `vocab` exempts a UID-vocabulary leaf or
+// subtree (its UIDs are VALUES a Tag resolves to, never AttrIDs — e.g.
+// `channel.type.Spreadsheet`).  Unmarked = fold, the universal default.
+// A subtree root's flags inherit; a per-leaf declaration wins.
+const (
+	attrFlagTape  = "tape"
+	attrFlagVocab = "vocab"
+)
 
 // msgType is one resolvable message type in the linked type universe.
 type msgType struct {
@@ -57,16 +61,6 @@ type attrReg struct {
 	isTape  bool    // EditFlow_Tape vs EditFlow_Fold (see attrIsTape)
 }
 
-// attrIsTape decides which register call an attr compiles to.
-//
-// PROVISIONAL (TODO/000-backlog-astar #1, B-attr-autoreg §5, ruling (a)):
-// the reserved `item.series.` tag literal IS the tape declaration — an attr
-// whose canonic name carries it registers EditFlow_Tape; everything else
-// folds.  This is the ONE site a ruling flip edits.
-func attrIsTape(text string) bool {
-	return strings.Contains(text, "item.series.")
-}
-
 // classifyAttrs walks every `tags Attr` block and returns the attrs the
 // registration rails emit, in declaration order.  ZO §4.8 compiled:
 //
@@ -78,43 +72,57 @@ func attrIsTape(text string) bool {
 //     — never an attr;
 //   - `.UID` is the valueless tail (the ItemID is the payload) — an attr
 //     with no prototype registers nothing;
-//   - leaves under an `option attr_vocab` root are UID vocabulary;
+//   - a leaf whose effective flags carry `vocab` is UID vocabulary;
 //   - what remains IS an attr: its tail must resolve to exactly one message
-//     type in the linked universe, or generation fails.
+//     type in the linked universe, or generation fails; `tape` declares
+//     EditFlow_Tape, unmarked folds.
+//
+// Flag validation is strict: an unknown flag, `tape, vocab` together, a
+// flag outside a `tags Attr` block, or an explicit `tape` on a leaf that
+// does not classify as an attr are all generation errors — dead markup
+// cannot sit silently.
 func classifyAttrs(src *ConstFile) ([]attrReg, error) {
-	vocabRoots := attrVocabRoots(src)
 	universe := typeUniverse()
+
+	if err := validateAttrFlags(src); err != nil {
+		return nil, err
+	}
 
 	var regs []attrReg
 	for _, decl := range src.Decls {
 		if decl.Tags == nil || decl.Tags.Name != "Attr" {
 			continue
 		}
-		flat := resolveTagEntries(decl.Tags.Entries, tag.Name{})
+		flat := resolveTagEntries(decl.Tags.Entries, tag.Name{}, nil)
 		for _, entry := range flat {
+			isTape := hasFlag(entry.flags, attrFlagTape)
 			if entry.isParent {
 				continue
 			}
+			if hasFlag(entry.flags, attrFlagVocab) {
+				continue // declared UID vocabulary
+			}
 			words := strings.Split(entry.text, ".")
 			tail := words[len(words)-1]
-			if !isTitleWord(tail) {
-				continue
-			}
-			if tail == "UID" {
-				continue // valueless attr: no prototype to register
-			}
-			if anyTitleWord(words[:len(words)-1]) {
-				continue // vocabulary member or unit-schema path
-			}
-			if underVocabRoot(entry.text, vocabRoots) {
-				continue // declared UID vocabulary
+			isAttrShape := isTitleWord(tail) && tail != "UID" &&
+				!anyTitleWord(words[:len(words)-1])
+			if !isAttrShape {
+				// An entry's OWN `: tape` on a non-attr leaf is dead markup;
+				// a subtree-inherited tape passing over unit tails is not.
+				if isTape && entry.flagsDeclared {
+					return nil, fmt.Errorf(
+						"entry %q (%s): `: tape` on a leaf that is not an attr "+
+							"(no message-type tail) — dead markup (ZO §4.8)",
+						entry.varName, entry.text)
+				}
+				continue // use-scope node, item key, unit tail, vocab member, or .UID
 			}
 			candidates := universe[tail]
 			if len(candidates) == 0 {
 				return nil, fmt.Errorf(
 					"attr %q (%s): trailing word %q resolves to no message type (ZO §4.8); "+
-						"declare a vocabulary root via `option %s` if this leaf is UID vocabulary",
-					entry.varName, entry.text, tail, attrVocabOption)
+						"mark the leaf or its subtree root `: %s` if it is UID vocabulary",
+					entry.varName, entry.text, tail, attrFlagVocab)
 			}
 			if len(candidates) > 1 {
 				var homes []string
@@ -129,27 +137,56 @@ func classifyAttrs(src *ConstFile) ([]attrReg, error) {
 				varName: entry.varName,
 				text:    entry.text,
 				msg:     candidates[0],
-				isTape:  attrIsTape(entry.text),
+				isTape:  isTape,
 			})
 		}
 	}
 	return regs, nil
 }
 
-// attrVocabRoots parses the attr_vocab option into canonic roots.
-func attrVocabRoots(src *ConstFile) []string {
-	var roots []string
-	for _, part := range strings.Split(src.GetOption(attrVocabOption), ";") {
-		if root := strings.TrimSpace(part); root != "" {
-			roots = append(roots, root)
+// validateAttrFlags walks every tags block's DECLARED (not inherited) flags:
+// names must be known, `tape, vocab` cannot combine, and flags outside a
+// `tags Attr` block have no meaning.
+func validateAttrFlags(src *ConstFile) error {
+	var walk func(blockName string, entries []*TagEntry) error
+	walk = func(blockName string, entries []*TagEntry) error {
+		for _, entry := range entries {
+			seen := map[string]bool{}
+			for _, flag := range entry.Flags {
+				if flag != attrFlagTape && flag != attrFlagVocab {
+					return fmt.Errorf("entry %q: unknown flag %q (known: %s, %s)",
+						entry.VarName, flag, attrFlagTape, attrFlagVocab)
+				}
+				if blockName != "Attr" {
+					return fmt.Errorf("entry %q: flag %q outside a `tags Attr` block",
+						entry.VarName, flag)
+				}
+				seen[flag] = true
+			}
+			if seen[attrFlagTape] && seen[attrFlagVocab] {
+				return fmt.Errorf("entry %q: `%s, %s` conflict — an entry is one or the other",
+					entry.VarName, attrFlagTape, attrFlagVocab)
+			}
+			if err := walk(blockName, entry.Children); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	for _, decl := range src.Decls {
+		if decl.Tags == nil {
+			continue
+		}
+		if err := walk(decl.Tags.Name, decl.Tags.Entries); err != nil {
+			return err
 		}
 	}
-	return roots
+	return nil
 }
 
-func underVocabRoot(text string, roots []string) bool {
-	for _, root := range roots {
-		if text == root || strings.HasPrefix(text, root+".") {
+func hasFlag(flags []string, flag string) bool {
+	for _, one := range flags {
+		if one == flag {
 			return true
 		}
 	}

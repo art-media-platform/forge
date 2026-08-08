@@ -198,8 +198,8 @@ func emitCSharpAttrRegistry(buf *strings.Builder, regs []attrReg) error {
 	}
 
 	buf.WriteString("\n// Every attr above whose trailing name word is a message type appears\n")
-	buf.WriteString("// here (ZO §4.8).  The tape rule is provisional: an attr carrying the\n")
-	buf.WriteString("// reserved `item.series.` literal rides EditFlow.Tape.\n")
+	buf.WriteString("// here (ZO §4.8); a `: tape` flag in the SDL declares EditFlow.Tape,\n")
+	buf.WriteString("// unmarked attrs fold.\n")
 	buf.WriteString("public static partial class AttrRegistry {\n\n")
 	buf.WriteString(indent + "public struct Entry {\n")
 	buf.WriteString(indent + indent + "public Name          Attr;\n")
@@ -227,7 +227,51 @@ func emitCSharpAttrRegistry(buf *strings.Builder, regs []attrReg) error {
 	}
 	buf.WriteString(indent + "};\n")
 	buf.WriteString("}\n")
+
+	emitCSharpBindAccessors(buf, regs)
 	return nil
+}
+
+// emitCSharpBindAccessors writes the flag-typed accessor per registered
+// attr: a fold attr yields only the FoldBinding shape, a tape attr only the
+// TapeBinding family — consuming a tape through a FoldBinding is
+// uncompilable.  Accessor + type only, no behavior.
+func emitCSharpBindAccessors(buf *strings.Builder, regs []attrReg) {
+	const indent = "    "
+
+	type accessor struct {
+		method  string
+		binding string
+		attrRef string
+	}
+	var accessors []accessor
+	for _, reg := range regs {
+		valueRef := "global::" + reg.msg.csNamespace + "." + reg.msg.name
+		attrRef := "Attr." + reg.varName
+		if reg.isTape {
+			accessors = append(accessors,
+				accessor{reg.varName + "Window", "TapeBinding<" + valueRef + ">", attrRef},
+				accessor{reg.varName + "Tail", "TapeTailBinding<" + valueRef + ">", attrRef})
+		} else {
+			accessors = append(accessors,
+				accessor{reg.varName, "FoldBinding<" + valueRef + ">", attrRef})
+		}
+	}
+
+	maxMethod, maxBinding := 0, 0
+	for _, acc := range accessors {
+		maxMethod = max(maxMethod, len(acc.method))
+		maxBinding = max(maxBinding, len(acc.binding))
+	}
+
+	buf.WriteString("\n// Flag-typed accessors: the declared storage style picks the binding\n")
+	buf.WriteString("// shape at compile time.\n")
+	buf.WriteString("public static partial class Bind {\n")
+	for _, acc := range accessors {
+		buf.WriteString(indent + "public static " + padRight(acc.binding, maxBinding) +
+			" " + padRight(acc.method+"()", maxMethod+2) + " => new(" + acc.attrRef + ");\n")
+	}
+	buf.WriteString("}\n")
 }
 
 // emitCSharpConstClass writes a partial class of scalar / UID constants.

@@ -159,8 +159,8 @@ func emitGoAttrRegistration(buf *strings.Builder, regs []attrReg, goPkg string) 
 	}
 
 	buf.WriteString("\n// Every attr above whose trailing name word is a message type registers\n")
-	buf.WriteString("// here at init (ZO §4.8).  The tape rule is provisional: an attr carrying\n")
-	buf.WriteString("// the reserved `item.series.` literal registers as EditFlow_Tape.\n")
+	buf.WriteString("// here at init (ZO §4.8); a `: tape` flag in the SDL declares EditFlow_Tape,\n")
+	buf.WriteString("// unmarked attrs fold.\n")
 	buf.WriteString("func init() {\n")
 	for _, reg := range regs {
 		typeRef := reg.msg.name

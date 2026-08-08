@@ -141,8 +141,8 @@ var (
 )
 
 // Every attr above whose trailing name word is a message type registers
-// here at init (ZO §4.8).  The tape rule is provisional: an attr carrying
-// the reserved `item.series.` literal registers as EditFlow_Tape.
+// here at init (ZO §4.8); a `: tape` flag in the SDL declares EditFlow_Tape,
+// unmarked attrs fold.
 func init() {
 	std.RegisterAttrDeclared(Attr.ItemLabels, &std.Labels{}, amp.EditFlow_Fold)
 	std.RegisterAttrDeclared(Attr.SeriesAssetTag, &amp.Tag{}, amp.EditFlow_Tape)
