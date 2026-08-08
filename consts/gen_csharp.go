@@ -221,7 +221,7 @@ func emitCSharpAttrRegistry(buf *strings.Builder, regs []attrReg) error {
 			flow = "Tape"
 		}
 		parserRef := "global::" + reg.msg.csNamespace + "." + reg.msg.name + ".Parser"
-		buf.WriteString(indent + indent + "new Entry { Attr = Attr." +
+		buf.WriteString(indent + indent + "new() { Attr = Attr." +
 			padRight(reg.varName+",", maxAttr+1) +
 			" Parser = " + parserRef + ", Flow = EditFlow." + flow + " },\n")
 	}

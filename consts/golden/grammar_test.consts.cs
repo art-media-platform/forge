@@ -117,9 +117,9 @@ namespace art.media.platform.std {
         }
 
         public static readonly Entry[] Attrs = {
-            new Entry { Attr = Attr.ItemLabels,        Parser = global::art.media.platform.std.Labels.Parser, Flow = EditFlow.Fold },
-            new Entry { Attr = Attr.SeriesAssetTag,    Parser = global::art.media.platform.Tag.Parser, Flow = EditFlow.Tape },
-            new Entry { Attr = Attr.SessionStatusAttr, Parser = global::art.media.platform.status.Status.Parser, Flow = EditFlow.Fold },
+            new() { Attr = Attr.ItemLabels,        Parser = global::art.media.platform.std.Labels.Parser, Flow = EditFlow.Fold },
+            new() { Attr = Attr.SeriesAssetTag,    Parser = global::art.media.platform.Tag.Parser, Flow = EditFlow.Tape },
+            new() { Attr = Attr.SessionStatusAttr, Parser = global::art.media.platform.status.Status.Parser, Flow = EditFlow.Fold },
         };
     }
 }
