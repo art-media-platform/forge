@@ -2,9 +2,14 @@
 //
 //   source: grammar_test.sdl
 
-package std
+package golden
 
-import "github.com/art-media-platform/amp.SDK/stdlib/tag"
+import (
+	"github.com/art-media-platform/amp.SDK/amp"
+	"github.com/art-media-platform/amp.SDK/amp/std"
+	"github.com/art-media-platform/amp.SDK/stdlib/status"
+	"github.com/art-media-platform/amp.SDK/stdlib/tag"
+)
 
 var Name = struct {
 	AppTag              tag.Name
@@ -30,6 +35,36 @@ var Name = struct {
 
 	LaunchWeb:           tag.Name{ID: tag.UID{0x7900A4A514A3C61B, 0x69753310BD7BA8BB}, Text: "session.Tag.www"},                 // 3t0-2kbb553sse-qkx9m22yrr-b5v
 	ReallySuperLongName: tag.Name{ID: tag.UID{0xDB93E07BBD0F0827, 0xCA42D43B008D32CC}, Text: "session.Tag.ReallySuperLongName"}, // 6vk-gh7rg8g10m-wnhqn7d08u-dqd
+}
+
+var Attr = struct {
+	ItemAttr               tag.Name
+	ItemLabels             tag.Name
+	ChildLink              tag.Name
+	ItemSeries             tag.Name
+	SeriesAssetTag         tag.Name
+	SeriesS2T              tag.Name
+	ChannelAttr            tag.Name
+	ChannelType            tag.Name
+	ChannelTypeSpreadsheet tag.Name
+	SessionStatusAttr      tag.Name
+}{
+	ItemAttr: tag.Name{ID: tag.UID{0xE8D8BECA5B3BBEB3, 0x1308458DB27C3504}, Text: "item"}, // 78v-2zdnqtvrut-j6225jqt7s-e84
+
+	ItemLabels: tag.Name{ID: tag.UID{0x89DC7C30D083C0B7, 0xCCB62B4FAAB34B4D}, Text: "item.Labels"},         // 49v-jy31n43s2v-wtejc9ypc6-kue
+	ChildLink:  tag.Name{ID: tag.UID{0x1D7FCD10B1143140, 0xB45F595E9B29E11E}, Text: "item.child.link.UID"}, // 0xg-z6j1d8n650-c8rutcuekm-s8y
+	ItemSeries: tag.Name{ID: tag.UID{0x647B2CF1DF98191A, 0xFF84E8A015C7C0BB}, Text: "item.series"},         // 34g-dqg3rws34e-gz178n0bwg-h5v
+
+	SeriesAssetTag: tag.Name{ID: tag.UID{0x38365DC6227700FB, 0x39ACAA81B253C797}, Text: "item.series.asset.Tag"}, // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
+	SeriesS2T:      tag.Name{ID: tag.UID{0x749CA29A38DAA5BF, 0x7139081806CBF2C5}, Text: "item.series.S2.UTC64"},  // 3nm-kj9nf6unqz-r2f88303dr-wq5
+
+	ChannelAttr: tag.Name{ID: tag.UID{0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60}, Text: "channel"}, // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
+
+	ChannelType: tag.Name{ID: tag.UID{0xE16EE14B4532E786, 0x8166AD32465165B0}, Text: "channel.type"}, // 71e-vhnqj9kwy3-82tpe69352-teh
+
+	ChannelTypeSpreadsheet: tag.Name{ID: tag.UID{0x1C0062A36805F2FB, 0xC37F9A8B51C0A909}, Text: "channel.type.Spreadsheet"}, // 0w0-1jb6u05ycx-w6zwuje8w1-b89
+
+	SessionStatusAttr: tag.Name{ID: tag.UID{0x7FB381BC8DB19B28, 0xE3EC642BF561552B}, Text: "session.Status"}, // 3zq-f0vt3ejmdn-f7v345guq2-p9c
 }
 
 var ID = struct {
@@ -104,3 +139,12 @@ const (
 var (
 	SessionContextID = tag.UID{0x0, 0x777}
 )
+
+// Every attr above whose trailing name word is a message type registers
+// here at init (ZO §4.8).  The tape rule is provisional: an attr carrying
+// the reserved `item.series.` literal registers as EditFlow_Tape.
+func init() {
+	std.RegisterAttrDeclared(Attr.ItemLabels, &std.Labels{}, amp.EditFlow_Fold)
+	std.RegisterAttrDeclared(Attr.SeriesAssetTag, &amp.Tag{}, amp.EditFlow_Tape)
+	std.RegisterAttrDeclared(Attr.SessionStatusAttr, &status.Status{}, amp.EditFlow_Fold)
+}

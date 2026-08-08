@@ -211,6 +211,41 @@ The repo's golden test exercises every grammar feature — tag hierarchies, UUID
 - **Mixed-type const groups** — strings, integers (`int32`/`int64`/`uint32`/`uint64`/`fixed64`), floats (`float32`/`float64`), hex literals, and explicit UID pairs in one file.
 - **Comment preservation** — leading and trailing source comments carry through to every language with idiomatic formatting.
 - **Column-aligned output** — generated files are diff-friendly and pleasant to read.
+- **Attr registration** (amp.SDK rails) — see below.
+
+## Attr Registration
+
+In a `tags Attr` block, a leaf whose **trailing name word** is a message type
+declares the value shape stored under that attr (amp ZO §4.8: "the stored
+message's exact name trails, always").  forge compiles that convention: beside
+the consts it emits registration for every such attr —
+
+- **Go** — an `init()` in the generated file calling `std.RegisterAttrDeclared`
+  with the attr and a prototype of its trailing type; the registrar re-verifies
+  the tail against the reflected type name at process init.
+- **C#** — an `AttrRegistry` class (same generated file) tabulating
+  attr → `MessageParser` → `EditFlow`, the decode table display layers read
+  through.
+
+The trailing word resolves against the message types linked into forge from
+its pinned amp.SDK (the type name, Go import path, and `csharp_namespace` all
+come from the generated descriptors).  A TitleCase tail that resolves to **no
+message type fails generation** — a typo'd attr cannot silently skip.  Exempt
+by classification: parent entries (namespaces), lowercase leaves (use-scope
+nodes, item keys, unit tails), `.UID` tails (valueless attrs), any leaf with a
+TitleCase word before the tail (vocabulary members, unit schemas), and
+subtrees declared UID vocabulary via
+`option attr_vocab = "channel.type";` (semicolon-separated roots).
+
+An attr whose canonic name carries the reserved `item.series.` literal
+registers as a tape (`EditFlow_Tape`); everything else folds.  Both the tape
+rule and the vocabulary-declaration mechanism are provisional conventions,
+isolated in `consts/attrs.go`.
+
+Because the type universe is forge's pinned amp.SDK, an attr naming a message
+type newer than the pin (or local to a consumer repo) fails generation until
+forge re-pins — registration ships on the forge release train that follows
+each amp.SDK release.
 
 ## Install
 
@@ -221,8 +256,14 @@ go install github.com/art-media-platform/forge/cmd/forge@latest
 Or run pinned without installing:
 
 ```
-go run github.com/art-media-platform/forge/cmd/forge@v0.3.1 consts ...
+go run github.com/art-media-platform/forge/cmd/forge@<tag> consts ...
 ```
+
+### Versioning
+
+forge versions **solely by lightweight git tag** — the tree carries no version
+file, const, or `--version` flag, by intent.  A release IS its tag; pin one of
+the published `vX.Y.Z` tags (or `@latest`).
 
 ## CLI
 

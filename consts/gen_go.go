@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/format"
 	"path"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -51,9 +52,47 @@ func GenerateGo(src *ConstFile, opts *GenOpts) ([]byte, error) {
 
 	decls := categorize(src)
 
+	// Attr registration rides the same file (ZO §4.8 compiled) — classify
+	// before the import block so its package needs emit with it.
+	attrRegs, err := classifyAttrs(src)
+	if err != nil {
+		return nil, err
+	}
+
 	// tag.Name / tag.UID come from amp.SDK; import only when referenced.
+	// Registration adds the std registrar, the amp EditFlow enum, and each
+	// prototype's home package (the file's own package imports nothing).
+	imports := map[string]bool{}
 	if decls.needsUID() {
-		buf.WriteString("\nimport \"github.com/art-media-platform/amp.SDK/stdlib/tag\"\n")
+		imports["github.com/art-media-platform/amp.SDK/stdlib/tag"] = true
+	}
+	if len(attrRegs) > 0 {
+		for _, pkgPath := range []string{sdkStdGoPkg, sdkAmpGoPkg} {
+			if pkgPath != goPkg {
+				imports[pkgPath] = true
+			}
+		}
+		for _, reg := range attrRegs {
+			if reg.msg.goPkgPath != goPkg {
+				imports[reg.msg.goPkgPath] = true
+			}
+		}
+	}
+	if len(imports) == 1 {
+		for pkgPath := range imports {
+			buf.WriteString("\nimport " + strconv.Quote(pkgPath) + "\n")
+		}
+	} else if len(imports) > 1 {
+		var paths []string
+		for pkgPath := range imports {
+			paths = append(paths, pkgPath)
+		}
+		sort.Strings(paths)
+		buf.WriteString("\nimport (\n")
+		for _, pkgPath := range paths {
+			buf.WriteString("\t" + strconv.Quote(pkgPath) + "\n")
+		}
+		buf.WriteString(")\n")
 	}
 	for _, tb := range decls.Tags {
 		emitGoTagsStruct(&buf, tb)
@@ -92,11 +131,50 @@ func GenerateGo(src *ConstFile, opts *GenOpts) ([]byte, error) {
 		}
 	}
 
+	if len(attrRegs) > 0 {
+		emitGoAttrRegistration(&buf, attrRegs, goPkg)
+	}
+
 	formatted, err := format.Source([]byte(buf.String()))
 	if err != nil {
 		return nil, fmt.Errorf("gofmt: %w", err)
 	}
 	return formatted, nil
+}
+
+// emitGoAttrRegistration writes the init-time attr registration: every
+// declared attr binds its prototype in the std registry, so decode-by-AttrID
+// (Registry().FindAttr / NewValue) needs no hand list.  The trailing name
+// word IS the stored message type — ZO §4.8 as a compiled invariant: a tail
+// resolving to no linked message type already failed generation, and
+// RegisterAttrDeclared re-verifies the tail against the prototype at init.
+func emitGoAttrRegistration(buf *strings.Builder, regs []attrReg, goPkg string) {
+	stdRef := "std."
+	if goPkg == sdkStdGoPkg {
+		stdRef = ""
+	}
+	ampRef := "amp."
+	if goPkg == sdkAmpGoPkg {
+		ampRef = ""
+	}
+
+	buf.WriteString("\n// Every attr above whose trailing name word is a message type registers\n")
+	buf.WriteString("// here at init (ZO §4.8).  The tape rule is provisional: an attr carrying\n")
+	buf.WriteString("// the reserved `item.series.` literal registers as EditFlow_Tape.\n")
+	buf.WriteString("func init() {\n")
+	for _, reg := range regs {
+		typeRef := reg.msg.name
+		if reg.msg.goPkgPath != goPkg {
+			typeRef = reg.msg.goPkgName + "." + reg.msg.name
+		}
+		flowRef := ampRef + "EditFlow_Fold"
+		if reg.isTape {
+			flowRef = ampRef + "EditFlow_Tape"
+		}
+		buf.WriteString("\t" + stdRef + "RegisterAttrDeclared(Attr." + reg.varName +
+			", &" + typeRef + "{}, " + flowRef + ")\n")
+	}
+	buf.WriteString("}\n")
 }
 
 // emitGoTagsStruct writes an anonymous struct var for a tags block.

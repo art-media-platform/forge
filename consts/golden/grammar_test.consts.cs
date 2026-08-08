@@ -2,6 +2,8 @@
 //
 //   source: grammar_test.sdl
 
+using Google.Protobuf;
+
 namespace art.media.platform.std {
     public static partial class Name {
         // ─── This is a big fancy comment, ───────────────────────────────
@@ -19,6 +21,25 @@ namespace art.media.platform.std {
 
         public static readonly Name LaunchWeb           = new(new(0x7900A4A514A3C61B, 0x69753310BD7BA8BB), "session.Tag.www");                  // 3t0-2kbb553sse-qkx9m22yrr-b5v
         public static readonly Name ReallySuperLongName = new(new(0xDB93E07BBD0F0827, 0xCA42D43B008D32CC), "session.Tag.ReallySuperLongName");  // 6vk-gh7rg8g10m-wnhqn7d08u-dqd
+    }
+
+    public static partial class Attr {
+        public static readonly Name ItemAttr               = new(new(0xE8D8BECA5B3BBEB3, 0x1308458DB27C3504), "item");                   // 78v-2zdnqtvrut-j6225jqt7s-e84
+
+        public static readonly Name ItemLabels             = new(new(0x89DC7C30D083C0B7, 0xCCB62B4FAAB34B4D), "item.Labels");            // 49v-jy31n43s2v-wtejc9ypc6-kue
+        public static readonly Name ChildLink              = new(new(0x1D7FCD10B1143140, 0xB45F595E9B29E11E), "item.child.link.UID");    // 0xg-z6j1d8n650-c8rutcuekm-s8y
+        public static readonly Name ItemSeries             = new(new(0x647B2CF1DF98191A, 0xFF84E8A015C7C0BB), "item.series");            // 34g-dqg3rws34e-gz178n0bwg-h5v
+
+        public static readonly Name SeriesAssetTag         = new(new(0x38365DC6227700FB, 0x39ACAA81B253C797), "item.series.asset.Tag");  // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
+        public static readonly Name SeriesS2T              = new(new(0x749CA29A38DAA5BF, 0x7139081806CBF2C5), "item.series.S2.UTC64");   // 3nm-kj9nf6unqz-r2f88303dr-wq5
+
+        public static readonly Name ChannelAttr            = new(new(0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60), "channel");                   // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
+
+        public static readonly Name ChannelType            = new(new(0xE16EE14B4532E786, 0x8166AD32465165B0), "channel.type");              // 71e-vhnqj9kwy3-82tpe69352-teh
+
+        public static readonly Name ChannelTypeSpreadsheet = new(new(0x1C0062A36805F2FB, 0xC37F9A8B51C0A909), "channel.type.Spreadsheet");  // 0w0-1jb6u05ycx-w6zwuje8w1-b89
+
+        public static readonly Name SessionStatusAttr      = new(new(0x7FB381BC8DB19B28, 0xE3EC642BF561552B), "session.Status");  // 3zq-f0vt3ejmdn-f7v345guq2-p9c
     }
 
     public static partial class ID {
@@ -82,5 +103,23 @@ namespace art.media.platform.std {
         public static readonly UID    UUID_Max       = new(0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
         // A distinct UUID, to confirm the parser disambiguates between sources.
         public static readonly UID    HiMom          = new(0x6BA7B8109DAD11D1, 0x80B400C04FD430C8);
+    }
+
+    // Every attr above whose trailing name word is a message type appears
+    // here (ZO §4.8).  The tape rule is provisional: an attr carrying the
+    // reserved `item.series.` literal rides EditFlow.Tape.
+    public static partial class AttrRegistry {
+
+        public struct Entry {
+            public Name          Attr;
+            public MessageParser Parser;
+            public EditFlow      Flow;
+        }
+
+        public static readonly Entry[] Attrs = {
+            new Entry { Attr = Attr.ItemLabels,        Parser = global::art.media.platform.std.Labels.Parser, Flow = EditFlow.Fold },
+            new Entry { Attr = Attr.SeriesAssetTag,    Parser = global::art.media.platform.Tag.Parser, Flow = EditFlow.Tape },
+            new Entry { Attr = Attr.SessionStatusAttr, Parser = global::art.media.platform.status.Status.Parser, Flow = EditFlow.Fold },
+        };
     }
 }

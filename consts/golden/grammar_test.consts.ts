@@ -27,6 +27,25 @@ export const Name = {
     ReallySuperLongName: { id: [0xDB93E07BBD0F0827n, 0xCA42D43B008D32CCn], text: "session.Tag.ReallySuperLongName" },  // 6vk-gh7rg8g10m-wnhqn7d08u-dqd
 } satisfies Record<string, TagName>;
 
+export const Attr = {
+    ItemAttr              : { id: [0xE8D8BECA5B3BBEB3n, 0x1308458DB27C3504n], text: "item" },                   // 78v-2zdnqtvrut-j6225jqt7s-e84
+
+    ItemLabels            : { id: [0x89DC7C30D083C0B7n, 0xCCB62B4FAAB34B4Dn], text: "item.Labels" },            // 49v-jy31n43s2v-wtejc9ypc6-kue
+    ChildLink             : { id: [0x1D7FCD10B1143140n, 0xB45F595E9B29E11En], text: "item.child.link.UID" },    // 0xg-z6j1d8n650-c8rutcuekm-s8y
+    ItemSeries            : { id: [0x647B2CF1DF98191An, 0xFF84E8A015C7C0BBn], text: "item.series" },            // 34g-dqg3rws34e-gz178n0bwg-h5v
+
+    SeriesAssetTag        : { id: [0x38365DC6227700FBn, 0x39ACAA81B253C797n], text: "item.series.asset.Tag" },  // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
+    SeriesS2T             : { id: [0x749CA29A38DAA5BFn, 0x7139081806CBF2C5n], text: "item.series.S2.UTC64" },   // 3nm-kj9nf6unqz-r2f88303dr-wq5
+
+    ChannelAttr           : { id: [0x3C0BCCB260A85864n, 0xC4DF8E1CD985DD60n], text: "channel" },                   // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
+
+    ChannelType           : { id: [0xE16EE14B4532E786n, 0x8166AD32465165B0n], text: "channel.type" },              // 71e-vhnqj9kwy3-82tpe69352-teh
+
+    ChannelTypeSpreadsheet: { id: [0x1C0062A36805F2FBn, 0xC37F9A8B51C0A909n], text: "channel.type.Spreadsheet" },  // 0w0-1jb6u05ycx-w6zwuje8w1-b89
+
+    SessionStatusAttr     : { id: [0x7FB381BC8DB19B28n, 0xE3EC642BF561552Bn], text: "session.Status" },  // 3zq-f0vt3ejmdn-f7v345guq2-p9c
+} satisfies Record<string, TagName>;
+
 export const ID = {
     SiteDownloads: { id: [0xB30A33823CA36F9En, 0x379DE2617633209Cn], text: "http://acme.com/downloads/" },  // 5m1-8ts4g53eyg-3g7g2d5v36-84w
     TestNet      : { id: [0x46407EE5F0A5436Fn, 0xDC383E0601E3386An], text: "your-scheme://server.com:23382/path" },  // 268-1zfcw558er-xsf1y0s0y6-f3b

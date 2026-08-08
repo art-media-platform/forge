@@ -36,6 +36,13 @@ func GenerateCSharp(src *ConstFile, opts *GenOpts) ([]byte, error) {
 
 	decls := categorize(src)
 
+	// Attr registration rides the same file (ZO §4.8 compiled): a generated
+	// attrID → parser table the display layer reads through.
+	attrRegs, err := classifyAttrs(src)
+	if err != nil {
+		return nil, err
+	}
+
 	// Emit tags blocks — do NOT fold in top-level UIDs.  Each tags block is a
 	// pure tag.Name namespace; UIDs get their own home in the Const class or
 	// in whatever ConstGroup they were declared in.
@@ -57,6 +64,12 @@ func GenerateCSharp(src *ConstFile, opts *GenOpts) ([]byte, error) {
 		emitCSharpConstClass(&body, "Const", topMembers, "")
 	}
 
+	if len(attrRegs) > 0 {
+		if err := emitCSharpAttrRegistry(&body, attrRegs); err != nil {
+			return nil, err
+		}
+	}
+
 	var buf strings.Builder
 
 	// Header
@@ -64,6 +77,9 @@ func GenerateCSharp(src *ConstFile, opts *GenOpts) ([]byte, error) {
 	if opts.SourceName != "" {
 		buf.WriteString("//\n")
 		buf.WriteString("//   source: " + opts.SourceName + "\n")
+	}
+	if len(attrRegs) > 0 {
+		buf.WriteString("\nusing Google.Protobuf;\n")
 	}
 
 	// Block-scoped namespace (C# 9 compatible): class bodies are indented one
@@ -165,6 +181,53 @@ func emitCSharpTagSection(buf *strings.Builder, sec *tagSection, maxVar int) {
 // csTagExpr builds the C# Name expression for a tag entry.
 func csTagExpr(entry *resolvedEntry) string {
 	return fmt.Sprintf("new(new(0x%016X, 0x%016X), %s)", entry.uidHi, entry.uidLo, csharpQuote(entry.text))
+}
+
+// emitCSharpAttrRegistry writes the generated attrID → parser table — every
+// declared attr paired with its message parser and edit flow (ZO §4.8), so
+// the Inspector's decode layer needs no hand list; curated display metadata
+// stays a hand overlay (AttrSpecs).
+func emitCSharpAttrRegistry(buf *strings.Builder, regs []attrReg) error {
+	const indent = "    "
+
+	for _, reg := range regs {
+		if reg.msg.csNamespace == "" {
+			return fmt.Errorf("attr %q (%s): message %s has no csharp_namespace in its .proto",
+				reg.varName, reg.text, reg.msg.name)
+		}
+	}
+
+	buf.WriteString("\n// Every attr above whose trailing name word is a message type appears\n")
+	buf.WriteString("// here (ZO §4.8).  The tape rule is provisional: an attr carrying the\n")
+	buf.WriteString("// reserved `item.series.` literal rides EditFlow.Tape.\n")
+	buf.WriteString("public static partial class AttrRegistry {\n\n")
+	buf.WriteString(indent + "public struct Entry {\n")
+	buf.WriteString(indent + indent + "public Name          Attr;\n")
+	buf.WriteString(indent + indent + "public MessageParser Parser;\n")
+	buf.WriteString(indent + indent + "public EditFlow      Flow;\n")
+	buf.WriteString(indent + "}\n\n")
+	buf.WriteString(indent + "public static readonly Entry[] Attrs = {\n")
+
+	// Measure the attr-ref column for alignment.
+	maxAttr := 0
+	for _, reg := range regs {
+		if n := len(reg.varName); n > maxAttr {
+			maxAttr = n
+		}
+	}
+	for _, reg := range regs {
+		flow := "Fold"
+		if reg.isTape {
+			flow = "Tape"
+		}
+		parserRef := "global::" + reg.msg.csNamespace + "." + reg.msg.name + ".Parser"
+		buf.WriteString(indent + indent + "new Entry { Attr = Attr." +
+			padRight(reg.varName+",", maxAttr+1) +
+			" Parser = " + parserRef + ", Flow = EditFlow." + flow + " },\n")
+	}
+	buf.WriteString(indent + "};\n")
+	buf.WriteString("}\n")
+	return nil
 }
 
 // emitCSharpConstClass writes a partial class of scalar / UID constants.

@@ -10,10 +10,17 @@
 // for every tag name, and align declarations into tidy columns.  The golden
 // round-trip asserts all three properties on every forge change.
 
-option go_package = "github.com/art-media-platform/amp.SDK/amp/std";
+// The golden dir compiles as a Go package on `go test ./...`, so the
+// generated registration must build for real: a NON-std go_package
+// exercises the qualified emission path (std.RegisterAttrDeclared,
+// std.Labels, amp.Tag, status.Status).
+option go_package = "github.com/art-media-platform/forge/consts/golden";
 option csharp_namespace = "art.media.platform.std";
 // Output-dir pinning option (resolved by Generator.Run, inert in emission).
 option ts_out = "";
+// UID-vocabulary root (ZO §4.8): leaves under it mint value UIDs, never
+// AttrIDs — exempt from the generated attr registration.
+option attr_vocab = "channel.type";
 
 tags Name {
 
@@ -35,6 +42,28 @@ tags Name {
     }
 }
 
+
+// Attr registration (ZO §4.8): a `tags Attr` leaf whose trailing word is a
+// linked message type registers in Go (init) and C# (AttrRegistry); the
+// reserved `item.series.` literal rides tape (provisional).  Parents,
+// lowercase leaves, `.UID` tails, mid-path TitleCase, and attr_vocab
+// subtrees are exempt.
+tags Attr {
+    ItemAttr "item" {
+        ItemLabels "Labels"
+        ChildLink  "child.link.UID"
+        ItemSeries "series" {
+            SeriesAssetTag "asset.Tag"
+            SeriesS2T      "S2.UTC64"
+        }
+    }
+    ChannelAttr "channel" {
+        ChannelType "type" {
+            ChannelTypeSpreadsheet "Spreadsheet"
+        }
+    }
+    SessionStatusAttr "session.Status"
+}
 
 // README example
 tags ID {
