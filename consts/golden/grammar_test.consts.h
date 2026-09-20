@@ -62,6 +62,8 @@ static const struct {
     TagName ItemSeries;
     TagName SeriesAssetTag;
     TagName SeriesS2T;
+    TagName NodeAttr;
+    TagName NodeSealedStatus;
     TagName ChannelAttr;
     TagName ChannelType;
     TagName ChannelTypeSpreadsheet;
@@ -75,6 +77,10 @@ static const struct {
 
     .SeriesAssetTag         = { { 0x38365DC6227700FB, 0x39ACAA81B253C797 }, "item.series.asset.Tag" },  // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
     .SeriesS2T              = { { 0x749CA29A38DAA5BF, 0x7139081806CBF2C5 }, "item.series.S2.UTC64" },   // 3nm-kj9nf6unqz-r2f88303dr-wq5
+
+    .NodeAttr               = { { 0x93F76E7915DC92BF, 0x6DD22A7FFF8A1FA8 }, "node" },                // 4my-xr7k5fwkbz-qvnjbgzzsn-7x8
+
+    .NodeSealedStatus       = { { 0x82E0C4CA8CCF5457, 0x64FCB69611D22D16 }, "node.sealed.Status" },  // 42w-32dp36gbjc-q9z5qks8x4-c8q
 
     .ChannelAttr            = { { 0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60 }, "channel" },                   // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
 

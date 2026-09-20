@@ -230,7 +230,7 @@ the consts it emits registration for every such attr —
 - **C# accessors** — a generated `Bind` class exposes one flag-typed
   accessor per attr: a fold attr yields `FoldBinding<V>`, a tape attr the
   `TapeBinding<V>`/`TapeTailBinding<V>` pair — consuming a tape through a
-  FoldBinding is uncompilable.
+  FoldBinding is uncompilable.  A sealed attr yields no accessor.
 
 The trailing word resolves against the message types linked into forge from
 its pinned amp.SDK (the type name, Go import path, and `csharp_namespace` all
@@ -249,15 +249,20 @@ ItemSeries "series" : tape {          // subtree root: children inherit
     SeriesTRS "TRS"                   // tape (inherited)
 }
 ChannelType "type" : vocab { … }      // UID vocabulary: exempt subtree
+NodeCredentials "Credentials" : sealed  // cell = SealedValue of Credentials
 ```
 
 `tape` declares `EditFlow_Tape`; `vocab` exempts UID vocabulary (leaves
-whose UIDs are values a Tag resolves to, never AttrIDs); unmarked = fold,
+whose UIDs are values a Tag resolves to, never AttrIDs); `sealed` declares
+that the cell rides as a `safe.SealedValue` box whose plaintext is the
+tail's message — Go registers it through `RegisterAttrDeclaredSealed`, the
+C# `AttrRegistry` entry carries `Sealed = true`, and no `Bind` accessor is
+emitted (a host resolver opens it, never a client binding); unmarked = fold,
 the universal default.  A per-leaf declaration wins over the inherited one.
 Flags are declaration-site markup only — never hashed, no UID motion.
-Validation is strict: unknown flags, `tape, vocab` together, flags outside
-a `tags Attr` block, and an own `: tape` on a non-attr leaf all fail
-generation.
+Validation is strict: unknown flags, `vocab` combined with either other
+flag, `sealed, tape` together, flags outside a `tags Attr` block, and an own
+`: tape` / `: sealed` on a non-attr leaf all fail generation.
 
 Because the type universe is forge's pinned amp.SDK, an attr naming a message
 type newer than the pin (or local to a consumer repo) fails generation until

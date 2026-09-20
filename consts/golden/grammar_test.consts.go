@@ -44,6 +44,8 @@ var Attr = struct {
 	ItemSeries             tag.Name
 	SeriesAssetTag         tag.Name
 	SeriesS2T              tag.Name
+	NodeAttr               tag.Name
+	NodeSealedStatus       tag.Name
 	ChannelAttr            tag.Name
 	ChannelType            tag.Name
 	ChannelTypeSpreadsheet tag.Name
@@ -57,6 +59,10 @@ var Attr = struct {
 
 	SeriesAssetTag: tag.Name{ID: tag.UID{0x38365DC6227700FB, 0x39ACAA81B253C797}, Text: "item.series.asset.Tag"}, // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
 	SeriesS2T:      tag.Name{ID: tag.UID{0x749CA29A38DAA5BF, 0x7139081806CBF2C5}, Text: "item.series.S2.UTC64"},  // 3nm-kj9nf6unqz-r2f88303dr-wq5
+
+	NodeAttr: tag.Name{ID: tag.UID{0x93F76E7915DC92BF, 0x6DD22A7FFF8A1FA8}, Text: "node"}, // 4my-xr7k5fwkbz-qvnjbgzzsn-7x8
+
+	NodeSealedStatus: tag.Name{ID: tag.UID{0x82E0C4CA8CCF5457, 0x64FCB69611D22D16}, Text: "node.sealed.Status"}, // 42w-32dp36gbjc-q9z5qks8x4-c8q
 
 	ChannelAttr: tag.Name{ID: tag.UID{0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60}, Text: "channel"}, // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
 
@@ -142,9 +148,11 @@ var (
 
 // Every attr above whose trailing name word is a message type registers
 // here at init (ZO §4.8); a `: tape` flag in the SDL declares EditFlow_Tape,
-// unmarked attrs fold.
+// unmarked attrs fold; a `: sealed` flag registers the attr as a
+// safe.SealedValue cell whose plaintext is the declared message.
 func init() {
 	std.RegisterAttrDeclared(Attr.ItemLabels, &std.Labels{}, amp.EditFlow_Fold)
 	std.RegisterAttrDeclared(Attr.SeriesAssetTag, &amp.Tag{}, amp.EditFlow_Tape)
+	std.RegisterAttrDeclaredSealed(Attr.NodeSealedStatus, &status.Status{}, amp.EditFlow_Fold)
 	std.RegisterAttrDeclared(Attr.SessionStatusAttr, &status.Status{}, amp.EditFlow_Fold)
 }

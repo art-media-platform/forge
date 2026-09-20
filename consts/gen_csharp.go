@@ -184,9 +184,10 @@ func csTagExpr(entry *resolvedEntry) string {
 }
 
 // emitCSharpAttrRegistry writes the generated attrID → parser table — every
-// declared attr paired with its message parser and edit flow (ZO §4.8), so
-// the Inspector's decode layer needs no hand list; curated display metadata
-// stays a hand overlay (AttrSpecs).
+// declared attr paired with its message parser, edit flow, and sealed
+// declaration (ZO §4.8), so the Inspector's decode layer needs no hand list;
+// curated display metadata stays a hand overlay (AttrSpecs).  A sealed attr's
+// cell is a safe.SealedValue box; Parser names the plaintext message.
 func emitCSharpAttrRegistry(buf *strings.Builder, regs []attrReg) error {
 	const indent = "    "
 
@@ -199,12 +200,14 @@ func emitCSharpAttrRegistry(buf *strings.Builder, regs []attrReg) error {
 
 	buf.WriteString("\n// Every attr above whose trailing name word is a message type appears\n")
 	buf.WriteString("// here (ZO §4.8); a `: tape` flag in the SDL declares EditFlow.Tape,\n")
-	buf.WriteString("// unmarked attrs fold.\n")
+	buf.WriteString("// unmarked attrs fold; a `: sealed` flag marks a SealedValue cell whose\n")
+	buf.WriteString("// plaintext is the parsed message.\n")
 	buf.WriteString("public static partial class AttrRegistry {\n\n")
 	buf.WriteString(indent + "public struct Entry {\n")
 	buf.WriteString(indent + indent + "public Name          Attr;\n")
 	buf.WriteString(indent + indent + "public MessageParser Parser;\n")
 	buf.WriteString(indent + indent + "public EditFlow      Flow;\n")
+	buf.WriteString(indent + indent + "public bool          Sealed;\n")
 	buf.WriteString(indent + "}\n\n")
 	buf.WriteString(indent + "public static readonly Entry[] Attrs = {\n")
 
@@ -220,10 +223,15 @@ func emitCSharpAttrRegistry(buf *strings.Builder, regs []attrReg) error {
 		if reg.isTape {
 			flow = "Tape"
 		}
+		sealed := "false"
+		if reg.isSealed {
+			sealed = "true"
+		}
 		parserRef := "global::" + reg.msg.csNamespace + "." + reg.msg.name + ".Parser"
 		buf.WriteString(indent + indent + "new() { Attr = Attr." +
 			padRight(reg.varName+",", maxAttr+1) +
-			" Parser = " + parserRef + ", Flow = EditFlow." + flow + " },\n")
+			" Parser = " + parserRef + ", Flow = EditFlow." + flow +
+			", Sealed = " + sealed + " },\n")
 	}
 	buf.WriteString(indent + "};\n")
 	buf.WriteString("}\n")
@@ -235,7 +243,9 @@ func emitCSharpAttrRegistry(buf *strings.Builder, regs []attrReg) error {
 // emitCSharpBindAccessors writes the flag-typed accessor per registered
 // attr: a fold attr yields only the FoldBinding shape, a tape attr only the
 // TapeBinding family — consuming a tape through a FoldBinding is
-// uncompilable.  Accessor + type only, no behavior.
+// uncompilable.  A sealed attr yields no accessor: its cell is ciphertext a
+// host resolver opens, never a client binding.  Accessor + type only, no
+// behavior.
 func emitCSharpBindAccessors(buf *strings.Builder, regs []attrReg) {
 	const indent = "    "
 
@@ -246,6 +256,9 @@ func emitCSharpBindAccessors(buf *strings.Builder, regs []attrReg) {
 	}
 	var accessors []accessor
 	for _, reg := range regs {
+		if reg.isSealed {
+			continue
+		}
 		valueRef := "global::" + reg.msg.csNamespace + "." + reg.msg.name
 		attrRef := "Attr." + reg.varName
 		if reg.isTape {

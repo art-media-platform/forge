@@ -44,7 +44,8 @@ tags Name {
 // linked message type registers in Go (init) and C# (AttrRegistry + Bind
 // accessors).  Declared flags: `: tape` = EditFlow_Tape (subtree root
 // inherits, per-leaf declaration wins), `: vocab` = UID vocabulary
-// (exempt); unmarked = fold.  Parents, lowercase leaves, `.UID` tails, and
+// (exempt), `: sealed` = a SealedValue cell of the tail's message (no Bind
+// accessor); unmarked = fold.  Parents, lowercase leaves, `.UID` tails, and
 // mid-path TitleCase are structurally exempt.
 tags Attr {
     ItemAttr "item" {
@@ -54,6 +55,9 @@ tags Attr {
             SeriesAssetTag "asset.Tag"
             SeriesS2T      "S2.UTC64"
         }
+    }
+    NodeAttr "node" {
+        NodeSealedStatus "sealed.Status" : sealed
     }
     ChannelAttr "channel" {
         ChannelType "type" : vocab {

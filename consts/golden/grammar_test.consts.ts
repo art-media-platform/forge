@@ -37,6 +37,10 @@ export const Attr = {
     SeriesAssetTag        : { id: [0x38365DC6227700FBn, 0x39ACAA81B253C797n], text: "item.series.asset.Tag" },  // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
     SeriesS2T             : { id: [0x749CA29A38DAA5BFn, 0x7139081806CBF2C5n], text: "item.series.S2.UTC64" },   // 3nm-kj9nf6unqz-r2f88303dr-wq5
 
+    NodeAttr              : { id: [0x93F76E7915DC92BFn, 0x6DD22A7FFF8A1FA8n], text: "node" },                // 4my-xr7k5fwkbz-qvnjbgzzsn-7x8
+
+    NodeSealedStatus      : { id: [0x82E0C4CA8CCF5457n, 0x64FCB69611D22D16n], text: "node.sealed.Status" },  // 42w-32dp36gbjc-q9z5qks8x4-c8q
+
     ChannelAttr           : { id: [0x3C0BCCB260A85864n, 0xC4DF8E1CD985DD60n], text: "channel" },                   // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
 
     ChannelType           : { id: [0xE16EE14B4532E786n, 0x8166AD32465165B0n], text: "channel.type" },              // 71e-vhnqj9kwy3-82tpe69352-teh

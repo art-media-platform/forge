@@ -38,12 +38,18 @@ const (
 // markup over convention, "future proof and does not rely on conventions").
 // `tape` declares EditFlow_Tape; `vocab` exempts a UID-vocabulary leaf or
 // subtree (its UIDs are VALUES a Tag resolves to, never AttrIDs — e.g.
-// `channel.type.Spreadsheet`).  Unmarked = fold, the universal default.
-// A subtree root's flags inherit; a per-leaf declaration wins.
+// `channel.type.Spreadsheet`); `sealed` declares that the cell rides as a
+// safe.SealedValue box whose plaintext is the tail's message (opened only by
+// keyholders; composes with fold, never with tape).  Unmarked = fold, the
+// universal default.  A subtree root's flags inherit; a per-leaf declaration
+// wins.
 const (
-	attrFlagTape  = "tape"
-	attrFlagVocab = "vocab"
+	attrFlagTape   = "tape"
+	attrFlagVocab  = "vocab"
+	attrFlagSealed = "sealed"
 )
+
+var attrFlagsKnown = []string{attrFlagTape, attrFlagVocab, attrFlagSealed}
 
 // msgType is one resolvable message type in the linked type universe.
 type msgType struct {
@@ -55,10 +61,11 @@ type msgType struct {
 
 // attrReg is one attr registration the generator emits.
 type attrReg struct {
-	varName string  // consts ident, e.g. "AppState"
-	text    string  // case-preserved canonic, e.g. "session.app.state.Tag"
-	msg     msgType // resolved prototype message type
-	isTape  bool    // EditFlow_Tape vs EditFlow_Fold (see attrIsTape)
+	varName  string  // consts ident, e.g. "AppState"
+	text     string  // case-preserved canonic, e.g. "session.app.state.Tag"
+	msg      msgType // resolved prototype message type
+	isTape   bool    // EditFlow_Tape vs EditFlow_Fold
+	isSealed bool    // the cell is a safe.SealedValue box of msg
 }
 
 // classifyAttrs walks every `tags Attr` block and returns the attrs the
@@ -75,12 +82,12 @@ type attrReg struct {
 //   - a leaf whose effective flags carry `vocab` is UID vocabulary;
 //   - what remains IS an attr: its tail must resolve to exactly one message
 //     type in the linked universe, or generation fails; `tape` declares
-//     EditFlow_Tape, unmarked folds.
+//     EditFlow_Tape, unmarked folds; `sealed` declares a SealedValue cell.
 //
-// Flag validation is strict: an unknown flag, `tape, vocab` together, a
-// flag outside a `tags Attr` block, or an explicit `tape` on a leaf that
-// does not classify as an attr are all generation errors — dead markup
-// cannot sit silently.
+// Flag validation is strict: an unknown flag, `vocab` combined with either
+// other flag, `sealed, tape` together, a flag outside a `tags Attr` block,
+// or an explicit `tape`/`sealed` on a leaf that does not classify as an
+// attr are all generation errors — dead markup cannot sit silently.
 func classifyAttrs(src *ConstFile) ([]attrReg, error) {
 	universe := typeUniverse()
 
@@ -96,6 +103,7 @@ func classifyAttrs(src *ConstFile) ([]attrReg, error) {
 		flat := resolveTagEntries(decl.Tags.Entries, tag.Name{}, nil)
 		for _, entry := range flat {
 			isTape := hasFlag(entry.flags, attrFlagTape)
+			isSealed := hasFlag(entry.flags, attrFlagSealed)
 			if entry.isParent {
 				continue
 			}
@@ -107,13 +115,13 @@ func classifyAttrs(src *ConstFile) ([]attrReg, error) {
 			isAttrShape := isTitleWord(tail) && tail != "UID" &&
 				!anyTitleWord(words[:len(words)-1])
 			if !isAttrShape {
-				// An entry's OWN `: tape` on a non-attr leaf is dead markup;
-				// a subtree-inherited tape passing over unit tails is not.
-				if isTape && entry.flagsDeclared {
+				// An entry's OWN `: tape`/`: sealed` on a non-attr leaf is dead
+				// markup; a subtree-inherited flag passing over unit tails is not.
+				if (isTape || isSealed) && entry.flagsDeclared {
 					return nil, fmt.Errorf(
-						"entry %q (%s): `: tape` on a leaf that is not an attr "+
+						"entry %q (%s): `: %s` on a leaf that is not an attr "+
 							"(no message-type tail) — dead markup (ZO §4.8)",
-						entry.varName, entry.text)
+						entry.varName, entry.text, strings.Join(entry.flags, ", "))
 				}
 				continue // use-scope node, item key, unit tail, vocab member, or .UID
 			}
@@ -134,10 +142,11 @@ func classifyAttrs(src *ConstFile) ([]attrReg, error) {
 					entry.varName, entry.text, tail, strings.Join(homes, ", "))
 			}
 			regs = append(regs, attrReg{
-				varName: entry.varName,
-				text:    entry.text,
-				msg:     candidates[0],
-				isTape:  isTape,
+				varName:  entry.varName,
+				text:     entry.text,
+				msg:      candidates[0],
+				isTape:   isTape,
+				isSealed: isSealed,
 			})
 		}
 	}
@@ -145,17 +154,18 @@ func classifyAttrs(src *ConstFile) ([]attrReg, error) {
 }
 
 // validateAttrFlags walks every tags block's DECLARED (not inherited) flags:
-// names must be known, `tape, vocab` cannot combine, and flags outside a
-// `tags Attr` block have no meaning.
+// names must be known, `vocab` combines with nothing (vocabulary is not an
+// attr), `sealed, tape` cannot combine (a tape's cells are its journal, never
+// one box), and flags outside a `tags Attr` block have no meaning.
 func validateAttrFlags(src *ConstFile) error {
 	var walk func(blockName string, entries []*TagEntry) error
 	walk = func(blockName string, entries []*TagEntry) error {
 		for _, entry := range entries {
 			seen := map[string]bool{}
 			for _, flag := range entry.Flags {
-				if flag != attrFlagTape && flag != attrFlagVocab {
-					return fmt.Errorf("entry %q: unknown flag %q (known: %s, %s)",
-						entry.VarName, flag, attrFlagTape, attrFlagVocab)
+				if !hasFlag(attrFlagsKnown, flag) {
+					return fmt.Errorf("entry %q: unknown flag %q (known: %s)",
+						entry.VarName, flag, strings.Join(attrFlagsKnown, ", "))
 				}
 				if blockName != "Attr" {
 					return fmt.Errorf("entry %q: flag %q outside a `tags Attr` block",
@@ -163,9 +173,15 @@ func validateAttrFlags(src *ConstFile) error {
 				}
 				seen[flag] = true
 			}
-			if seen[attrFlagTape] && seen[attrFlagVocab] {
-				return fmt.Errorf("entry %q: `%s, %s` conflict — an entry is one or the other",
-					entry.VarName, attrFlagTape, attrFlagVocab)
+			for _, pair := range [][2]string{
+				{attrFlagTape, attrFlagVocab},
+				{attrFlagSealed, attrFlagVocab},
+				{attrFlagSealed, attrFlagTape},
+			} {
+				if seen[pair[0]] && seen[pair[1]] {
+					return fmt.Errorf("entry %q: `%s, %s` conflict — an entry is one or the other",
+						entry.VarName, pair[0], pair[1])
+				}
 			}
 			if err := walk(blockName, entry.Children); err != nil {
 				return err

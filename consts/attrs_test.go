@@ -20,7 +20,8 @@ func parseSDL(t *testing.T, body string) *ConstFile {
 // mid-path TitleCase (vocabulary members / unit schemas), and `: vocab`
 // leaves/subtrees never do.  `: tape` declares EditFlow_Tape (a subtree
 // root's flags inherit — SeriesLabels below — and inherited tape passing
-// over a unit tail is inert); unmarked folds.
+// over a unit tail is inert); `: sealed` declares a SealedValue cell and
+// folds; unmarked folds.
 func TestClassifyAttrs(t *testing.T) {
 	src := parseSDL(t, `
 tags Attr {
@@ -33,6 +34,9 @@ tags Attr {
             SeriesLabels   "Labels"
             SeriesS2T      "S2.UTC64"
         }
+    }
+    NodeAttr "node" {
+        NodeCredentials "Labels" : sealed
     }
     ChannelAttr "channel" {
         ChannelType "type" : vocab {
@@ -56,13 +60,15 @@ tags Crypto {
 	}
 
 	want := map[string]struct {
-		text   string
-		msg    string
-		isTape bool
+		text     string
+		msg      string
+		isTape   bool
+		isSealed bool
 	}{
-		"ItemLabels":     {"item.Labels", "Labels", false},
-		"SeriesAssetTag": {"item.series.asset.Tag", "Tag", true},
-		"SeriesLabels":   {"item.series.Labels", "Labels", true},
+		"ItemLabels":      {"item.Labels", "Labels", false, false},
+		"SeriesAssetTag":  {"item.series.asset.Tag", "Tag", true, false},
+		"SeriesLabels":    {"item.series.Labels", "Labels", true, false},
+		"NodeCredentials": {"node.Labels", "Labels", false, true},
 	}
 	if len(regs) != len(want) {
 		var got []string
@@ -77,10 +83,11 @@ tags Crypto {
 			t.Errorf("unexpected attr %q (%s)", reg.varName, reg.text)
 			continue
 		}
-		if reg.text != expect.text || reg.msg.name != expect.msg || reg.isTape != expect.isTape {
-			t.Errorf("attr %q: got (%s, %s, tape=%v), want (%s, %s, tape=%v)",
-				reg.varName, reg.text, reg.msg.name, reg.isTape,
-				expect.text, expect.msg, expect.isTape)
+		if reg.text != expect.text || reg.msg.name != expect.msg ||
+			reg.isTape != expect.isTape || reg.isSealed != expect.isSealed {
+			t.Errorf("attr %q: got (%s, %s, tape=%v, sealed=%v), want (%s, %s, tape=%v, sealed=%v)",
+				reg.varName, reg.text, reg.msg.name, reg.isTape, reg.isSealed,
+				expect.text, expect.msg, expect.isTape, expect.isSealed)
 		}
 	}
 }
@@ -104,9 +111,10 @@ tags Attr {
 	}
 }
 
-// Flag validation is strict: unknown names, `tape, vocab` together, flags
-// outside `tags Attr`, and an OWN `: tape` on a non-attr leaf all fail
-// generation — dead markup cannot sit silently.
+// Flag validation is strict: unknown names, `vocab` combined with either
+// other flag, `sealed, tape` together, flags outside `tags Attr`, and an OWN
+// `: tape` / `: sealed` on a non-attr leaf all fail generation — dead markup
+// cannot sit silently.
 func TestClassifyAttrsFlagValidation(t *testing.T) {
 	cases := []struct {
 		name string
@@ -131,6 +139,26 @@ func TestClassifyAttrsFlagValidation(t *testing.T) {
 		{
 			"own tape on a non-attr leaf",
 			`tags Attr { ItemAttr "item" { TileAttr "tile" : tape } }`,
+			"dead markup",
+		},
+		{
+			"sealed+tape conflict",
+			`tags Attr { ItemAttr "item" { ItemLabels "Labels" : sealed, tape } }`,
+			"conflict",
+		},
+		{
+			"sealed+vocab conflict",
+			`tags Attr { ItemAttr "item" { ItemLabels "Labels" : sealed, vocab } }`,
+			"conflict",
+		},
+		{
+			"sealed outside tags Attr",
+			`tags Crypto { Poly "amp.crypto.poly" : sealed }`,
+			"outside",
+		},
+		{
+			"own sealed on a non-attr leaf",
+			`tags Attr { ItemAttr "item" { TileAttr "tile" : sealed } }`,
 			"dead markup",
 		},
 	}

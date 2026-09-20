@@ -148,6 +148,8 @@ func GenerateGo(src *ConstFile, opts *GenOpts) ([]byte, error) {
 // word IS the stored message type — ZO §4.8 as a compiled invariant: a tail
 // resolving to no linked message type already failed generation, and
 // RegisterAttrDeclared re-verifies the tail against the prototype at init.
+// A `: sealed` attr registers through RegisterAttrDeclaredSealed: its cell is
+// a safe.SealedValue box and the tail names the plaintext message.
 func emitGoAttrRegistration(buf *strings.Builder, regs []attrReg, goPkg string) {
 	stdRef := "std."
 	if goPkg == sdkStdGoPkg {
@@ -160,7 +162,8 @@ func emitGoAttrRegistration(buf *strings.Builder, regs []attrReg, goPkg string) 
 
 	buf.WriteString("\n// Every attr above whose trailing name word is a message type registers\n")
 	buf.WriteString("// here at init (ZO §4.8); a `: tape` flag in the SDL declares EditFlow_Tape,\n")
-	buf.WriteString("// unmarked attrs fold.\n")
+	buf.WriteString("// unmarked attrs fold; a `: sealed` flag registers the attr as a\n")
+	buf.WriteString("// safe.SealedValue cell whose plaintext is the declared message.\n")
 	buf.WriteString("func init() {\n")
 	for _, reg := range regs {
 		typeRef := reg.msg.name
@@ -171,7 +174,11 @@ func emitGoAttrRegistration(buf *strings.Builder, regs []attrReg, goPkg string) 
 		if reg.isTape {
 			flowRef = ampRef + "EditFlow_Tape"
 		}
-		buf.WriteString("\t" + stdRef + "RegisterAttrDeclared(Attr." + reg.varName +
+		registrar := "RegisterAttrDeclared"
+		if reg.isSealed {
+			registrar = "RegisterAttrDeclaredSealed"
+		}
+		buf.WriteString("\t" + stdRef + registrar + "(Attr." + reg.varName +
 			", &" + typeRef + "{}, " + flowRef + ")\n")
 	}
 	buf.WriteString("}\n")

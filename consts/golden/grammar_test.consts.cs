@@ -33,6 +33,10 @@ namespace art.media.platform.std {
         public static readonly Name SeriesAssetTag         = new(new(0x38365DC6227700FB, 0x39ACAA81B253C797), "item.series.asset.Tag");  // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
         public static readonly Name SeriesS2T              = new(new(0x749CA29A38DAA5BF, 0x7139081806CBF2C5), "item.series.S2.UTC64");   // 3nm-kj9nf6unqz-r2f88303dr-wq5
 
+        public static readonly Name NodeAttr               = new(new(0x93F76E7915DC92BF, 0x6DD22A7FFF8A1FA8), "node");                // 4my-xr7k5fwkbz-qvnjbgzzsn-7x8
+
+        public static readonly Name NodeSealedStatus       = new(new(0x82E0C4CA8CCF5457, 0x64FCB69611D22D16), "node.sealed.Status");  // 42w-32dp36gbjc-q9z5qks8x4-c8q
+
         public static readonly Name ChannelAttr            = new(new(0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60), "channel");                   // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
 
         public static readonly Name ChannelType            = new(new(0xE16EE14B4532E786, 0x8166AD32465165B0), "channel.type");              // 71e-vhnqj9kwy3-82tpe69352-teh
@@ -107,19 +111,22 @@ namespace art.media.platform.std {
 
     // Every attr above whose trailing name word is a message type appears
     // here (ZO §4.8); a `: tape` flag in the SDL declares EditFlow.Tape,
-    // unmarked attrs fold.
+    // unmarked attrs fold; a `: sealed` flag marks a SealedValue cell whose
+    // plaintext is the parsed message.
     public static partial class AttrRegistry {
 
         public struct Entry {
             public Name          Attr;
             public MessageParser Parser;
             public EditFlow      Flow;
+            public bool          Sealed;
         }
 
         public static readonly Entry[] Attrs = {
-            new() { Attr = Attr.ItemLabels,        Parser = global::art.media.platform.std.Labels.Parser, Flow = EditFlow.Fold },
-            new() { Attr = Attr.SeriesAssetTag,    Parser = global::art.media.platform.Tag.Parser, Flow = EditFlow.Tape },
-            new() { Attr = Attr.SessionStatusAttr, Parser = global::art.media.platform.status.Status.Parser, Flow = EditFlow.Fold },
+            new() { Attr = Attr.ItemLabels,        Parser = global::art.media.platform.std.Labels.Parser, Flow = EditFlow.Fold, Sealed = false },
+            new() { Attr = Attr.SeriesAssetTag,    Parser = global::art.media.platform.Tag.Parser, Flow = EditFlow.Tape, Sealed = false },
+            new() { Attr = Attr.NodeSealedStatus,  Parser = global::art.media.platform.status.Status.Parser, Flow = EditFlow.Fold, Sealed = true },
+            new() { Attr = Attr.SessionStatusAttr, Parser = global::art.media.platform.status.Status.Parser, Flow = EditFlow.Fold, Sealed = false },
         };
     }
 
