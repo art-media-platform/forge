@@ -7,49 +7,49 @@ using Google.Protobuf;
 namespace art.media.platform.std {
     public static partial class Name {
         // ─── This is a big fancy comment, ───────────────────────────────
-        public static readonly Name AppTag              = new(new(0x9FC2012FD63F847A, 0x51AA55A31D90CD25), "app");        // 4zs-80kzpjzhjx-53bkpndft1-m95
+        public static readonly Name AppTag              = new(new(0x9FC2012FD63F847A, 0x51AA55A31D90CD25), "app");        // 4zs80-kzpjz-hjx53b-kpndf-t1m95
 
-        public static readonly Name AppState            = new(new(0xFAA5BBA978628672, 0x22BC2C65BFDD460C), "app.state");  // 7un-qxuky32htt-25g1ddqzxu-jhd
+        public static readonly Name AppState            = new(new(0xFAA5BBA978628672, 0x22BC2C65BFDD460C), "app.state");  // 7unqx-uky32-htt25g-1ddqz-xujhd
 
         // ─── This is a very descriptive comment ─────────────────────────
         // that spans multiple lines to exercise
         // the multi-line doc-comment code path.
-        public static readonly Name SessionAttr         = new(new(0x5948CA6969CBDF2F, 0x01C92A44FA60AB24), "session");                          // 2t9-356kufcvwr-h3k9b8mx61-bt4
+        public static readonly Name SessionAttr         = new(new(0x5948CA6969CBDF2F, 0x01C92A44FA60AB24), "session");                          // 2t935-6kufc-vwrh3k-9b8mx-61bt4
 
-        public static readonly Name LoginID             = new(new(0x761CD041F19A871E, 0x588D714F3B7C0369), "session.Login");                    // 3q3-m843wduhwg-5j3cj9wxrs-0v9
-        public static readonly Name SessionTag          = new(new(0xCCE00314A1263502, 0x7A38CD68C10DC759), "session.Tag");                      // 6dw-01j98966n1-7nf6ee30hv-jut
+        public static readonly Name LoginID             = new(new(0x761CD041F19A871E, 0x588D714F3B7C0369), "session.Login");                    // 3q3m8-43wdu-hwg5j3-cj9wx-rs0v9
+        public static readonly Name SessionTag          = new(new(0xCCE00314A1263502, 0x7A38CD68C10DC759), "session.Tag");                      // 6dw01-j9896-6n17nf-6ee30-hvjut
 
-        public static readonly Name LaunchWeb           = new(new(0x7900A4A514A3C61B, 0x69753310BD7BA8BB), "session.Tag.www");                  // 3t0-2kbb553sse-qkx9m22yrr-b5v
-        public static readonly Name ReallySuperLongName = new(new(0xDB93E07BBD0F0827, 0xCA42D43B008D32CC), "session.Tag.ReallySuperLongName");  // 6vk-gh7rg8g10m-wnhqn7d08u-dqd
+        public static readonly Name LaunchWeb           = new(new(0x7900A4A514A3C61B, 0x69753310BD7BA8BB), "session.Tag.www");                  // 3t02k-bb553-sseqkx-9m22y-rrb5v
+        public static readonly Name ReallySuperLongName = new(new(0xDB93E07BBD0F0827, 0xCA42D43B008D32CC), "session.Tag.ReallySuperLongName");  // 6vkgh-7rg8g-10mwnh-qn7d0-8udqd
     }
 
     public static partial class Attr {
-        public static readonly Name ItemAttr               = new(new(0xE8D8BECA5B3BBEB3, 0x1308458DB27C3504), "item");                   // 78v-2zdnqtvrut-j6225jqt7s-e84
+        public static readonly Name ItemAttr               = new(new(0xE8D8BECA5B3BBEB3, 0x1308458DB27C3504), "item");                   // 78v2z-dnqtv-rutj62-25jqt-7se84
 
-        public static readonly Name ItemLabels             = new(new(0x89DC7C30D083C0B7, 0xCCB62B4FAAB34B4D), "item.Labels");            // 49v-jy31n43s2v-wtejc9ypc6-kue
-        public static readonly Name ChildLink              = new(new(0x1D7FCD10B1143140, 0xB45F595E9B29E11E), "item.child.link.UID");    // 0xg-z6j1d8n650-c8rutcuekm-s8y
-        public static readonly Name ItemSeries             = new(new(0x647B2CF1DF98191A, 0xFF84E8A015C7C0BB), "item.series");            // 34g-dqg3rws34e-gz178n0bwg-h5v
+        public static readonly Name ItemLabels             = new(new(0x89DC7C30D083C0B7, 0xCCB62B4FAAB34B4D), "item.Labels");            // 49vjy-31n43-s2vwte-jc9yp-c6kue
+        public static readonly Name ChildLink              = new(new(0x1D7FCD10B1143140, 0xB45F595E9B29E11E), "item.child.link.UID");    // 0xgz6-j1d8n-650c8r-utcue-kms8y
+        public static readonly Name ItemSeries             = new(new(0x647B2CF1DF98191A, 0xFF84E8A015C7C0BB), "item.series");            // 34gdq-g3rws-34egz1-78n0b-wgh5v
 
-        public static readonly Name SeriesAssetTag         = new(new(0x38365DC6227700FB, 0x39ACAA81B253C797), "item.series.asset.Tag");  // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
-        public static readonly Name SeriesS2T              = new(new(0x749CA29A38DAA5BF, 0x7139081806CBF2C5), "item.series.S2.UTC64");   // 3nm-kj9nf6unqz-r2f88303dr-wq5
+        public static readonly Name SeriesAssetTag         = new(new(0x38365DC6227700FB, 0x39ACAA81B253C797), "item.series.asset.Tag");  // 1s6tf-wd8mr-03xmmc-5bh6t-57jwr
+        public static readonly Name SeriesS2T              = new(new(0x749CA29A38DAA5BF, 0x7139081806CBF2C5), "item.series.S2.UTC64");   // 3nmkj-9nf6u-nqzr2f-88303-drwq5
 
-        public static readonly Name NodeAttr               = new(new(0x93F76E7915DC92BF, 0x6DD22A7FFF8A1FA8), "node");                // 4my-xr7k5fwkbz-qvnjbgzzsn-7x8
+        public static readonly Name NodeAttr               = new(new(0x93F76E7915DC92BF, 0x6DD22A7FFF8A1FA8), "node");                // 4myxr-7k5fw-kbzqvn-jbgzz-sn7x8
 
-        public static readonly Name NodeSealedStatus       = new(new(0x82E0C4CA8CCF5457, 0x64FCB69611D22D16), "node.sealed.Status");  // 42w-32dp36gbjc-q9z5qks8x4-c8q
+        public static readonly Name NodeSealedStatus       = new(new(0x82E0C4CA8CCF5457, 0x64FCB69611D22D16), "node.sealed.Status");  // 42w32-dp36g-bjcq9z-5qks8-x4c8q
 
-        public static readonly Name ChannelAttr            = new(new(0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60), "channel");                   // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
+        public static readonly Name ChannelAttr            = new(new(0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60), "channel");                   // 1w1g6-c4s58-c1kd9r-wf3md-scrc0
 
-        public static readonly Name ChannelType            = new(new(0xE16EE14B4532E786, 0x8166AD32465165B0), "channel.type");              // 71e-vhnqj9kwy3-82tpe69352-teh
+        public static readonly Name ChannelType            = new(new(0xE16EE14B4532E786, 0x8166AD32465165B0), "channel.type");              // 71evh-nqj9k-wy382t-pe693-52teh
 
-        public static readonly Name ChannelTypeSpreadsheet = new(new(0x1C0062A36805F2FB, 0xC37F9A8B51C0A909), "channel.type.Spreadsheet");  // 0w0-1jb6u05ycx-w6zwuje8w1-b89
+        public static readonly Name ChannelTypeSpreadsheet = new(new(0x1C0062A36805F2FB, 0xC37F9A8B51C0A909), "channel.type.Spreadsheet");  // 0w01j-b6u05-ycxw6z-wuje8-w1b89
 
-        public static readonly Name SessionStatusAttr      = new(new(0x7FB381BC8DB19B28, 0xE3EC642BF561552B), "session.Status");  // 3zq-f0vt3ejmdn-f7v345guq2-p9c
+        public static readonly Name SessionStatusAttr      = new(new(0x7FB381BC8DB19B28, 0xE3EC642BF561552B), "session.Status");  // 3zqf0-vt3ej-mdnf7v-345gu-q2p9c
     }
 
     public static partial class ID {
-        public static readonly Name SiteDownloads = new(new(0xB30A33823CA36F9E, 0x379DE2617633209C), "http://acme.com/downloads/");  // 5m1-8ts4g53eyg-3g7g2d5v36-84w
-        public static readonly Name TestNet       = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 268-1zfcw558er-xsf1y0s0y6-f3b
-        public static readonly Name BestShow      = new(new(0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41), "Fraggle.Rock");  // 4um-6x267rss54-67p59q3g7u-zu1
+        public static readonly Name SiteDownloads = new(new(0xB30A33823CA36F9E, 0x379DE2617633209C), "http://acme.com/downloads/");  // 5m18t-s4g53-eyg3g7-g2d5v-3684w
+        public static readonly Name TestNet       = new(new(0x46407EE5F0A5436F, 0xDC383E0601E3386A), "your-scheme://server.com:23382/path");  // 2681z-fcw55-8erxsf-1y0s0-y6f3b
+        public static readonly Name BestShow      = new(new(0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41), "Fraggle.Rock");  // 4um6x-267rs-s5467p-59q3g-7uzu1
     }
 
     public static partial class SomeFiles {

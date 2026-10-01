@@ -21,20 +21,20 @@ var Name = struct {
 	ReallySuperLongName tag.Name
 }{
 	// ─── This is a big fancy comment, ───────────────────────────────
-	AppTag: tag.Name{ID: tag.UID{0x9FC2012FD63F847A, 0x51AA55A31D90CD25}, Text: "app"}, // 4zs-80kzpjzhjx-53bkpndft1-m95
+	AppTag: tag.Name{ID: tag.UID{0x9FC2012FD63F847A, 0x51AA55A31D90CD25}, Text: "app"}, // 4zs80-kzpjz-hjx53b-kpndf-t1m95
 
-	AppState: tag.Name{ID: tag.UID{0xFAA5BBA978628672, 0x22BC2C65BFDD460C}, Text: "app.state"}, // 7un-qxuky32htt-25g1ddqzxu-jhd
+	AppState: tag.Name{ID: tag.UID{0xFAA5BBA978628672, 0x22BC2C65BFDD460C}, Text: "app.state"}, // 7unqx-uky32-htt25g-1ddqz-xujhd
 
 	// ─── This is a very descriptive comment ─────────────────────────
 	// that spans multiple lines to exercise
 	// the multi-line doc-comment code path.
-	SessionAttr: tag.Name{ID: tag.UID{0x5948CA6969CBDF2F, 0x01C92A44FA60AB24}, Text: "session"}, // 2t9-356kufcvwr-h3k9b8mx61-bt4
+	SessionAttr: tag.Name{ID: tag.UID{0x5948CA6969CBDF2F, 0x01C92A44FA60AB24}, Text: "session"}, // 2t935-6kufc-vwrh3k-9b8mx-61bt4
 
-	LoginID:    tag.Name{ID: tag.UID{0x761CD041F19A871E, 0x588D714F3B7C0369}, Text: "session.Login"}, // 3q3-m843wduhwg-5j3cj9wxrs-0v9
-	SessionTag: tag.Name{ID: tag.UID{0xCCE00314A1263502, 0x7A38CD68C10DC759}, Text: "session.Tag"},   // 6dw-01j98966n1-7nf6ee30hv-jut
+	LoginID:    tag.Name{ID: tag.UID{0x761CD041F19A871E, 0x588D714F3B7C0369}, Text: "session.Login"}, // 3q3m8-43wdu-hwg5j3-cj9wx-rs0v9
+	SessionTag: tag.Name{ID: tag.UID{0xCCE00314A1263502, 0x7A38CD68C10DC759}, Text: "session.Tag"},   // 6dw01-j9896-6n17nf-6ee30-hvjut
 
-	LaunchWeb:           tag.Name{ID: tag.UID{0x7900A4A514A3C61B, 0x69753310BD7BA8BB}, Text: "session.Tag.www"},                 // 3t0-2kbb553sse-qkx9m22yrr-b5v
-	ReallySuperLongName: tag.Name{ID: tag.UID{0xDB93E07BBD0F0827, 0xCA42D43B008D32CC}, Text: "session.Tag.ReallySuperLongName"}, // 6vk-gh7rg8g10m-wnhqn7d08u-dqd
+	LaunchWeb:           tag.Name{ID: tag.UID{0x7900A4A514A3C61B, 0x69753310BD7BA8BB}, Text: "session.Tag.www"},                 // 3t02k-bb553-sseqkx-9m22y-rrb5v
+	ReallySuperLongName: tag.Name{ID: tag.UID{0xDB93E07BBD0F0827, 0xCA42D43B008D32CC}, Text: "session.Tag.ReallySuperLongName"}, // 6vkgh-7rg8g-10mwnh-qn7d0-8udqd
 }
 
 var Attr = struct {
@@ -51,26 +51,26 @@ var Attr = struct {
 	ChannelTypeSpreadsheet tag.Name
 	SessionStatusAttr      tag.Name
 }{
-	ItemAttr: tag.Name{ID: tag.UID{0xE8D8BECA5B3BBEB3, 0x1308458DB27C3504}, Text: "item"}, // 78v-2zdnqtvrut-j6225jqt7s-e84
+	ItemAttr: tag.Name{ID: tag.UID{0xE8D8BECA5B3BBEB3, 0x1308458DB27C3504}, Text: "item"}, // 78v2z-dnqtv-rutj62-25jqt-7se84
 
-	ItemLabels: tag.Name{ID: tag.UID{0x89DC7C30D083C0B7, 0xCCB62B4FAAB34B4D}, Text: "item.Labels"},         // 49v-jy31n43s2v-wtejc9ypc6-kue
-	ChildLink:  tag.Name{ID: tag.UID{0x1D7FCD10B1143140, 0xB45F595E9B29E11E}, Text: "item.child.link.UID"}, // 0xg-z6j1d8n650-c8rutcuekm-s8y
-	ItemSeries: tag.Name{ID: tag.UID{0x647B2CF1DF98191A, 0xFF84E8A015C7C0BB}, Text: "item.series"},         // 34g-dqg3rws34e-gz178n0bwg-h5v
+	ItemLabels: tag.Name{ID: tag.UID{0x89DC7C30D083C0B7, 0xCCB62B4FAAB34B4D}, Text: "item.Labels"},         // 49vjy-31n43-s2vwte-jc9yp-c6kue
+	ChildLink:  tag.Name{ID: tag.UID{0x1D7FCD10B1143140, 0xB45F595E9B29E11E}, Text: "item.child.link.UID"}, // 0xgz6-j1d8n-650c8r-utcue-kms8y
+	ItemSeries: tag.Name{ID: tag.UID{0x647B2CF1DF98191A, 0xFF84E8A015C7C0BB}, Text: "item.series"},         // 34gdq-g3rws-34egz1-78n0b-wgh5v
 
-	SeriesAssetTag: tag.Name{ID: tag.UID{0x38365DC6227700FB, 0x39ACAA81B253C797}, Text: "item.series.asset.Tag"}, // 1s6-tfwd8mr03x-mmc5bh6t57-jwr
-	SeriesS2T:      tag.Name{ID: tag.UID{0x749CA29A38DAA5BF, 0x7139081806CBF2C5}, Text: "item.series.S2.UTC64"},  // 3nm-kj9nf6unqz-r2f88303dr-wq5
+	SeriesAssetTag: tag.Name{ID: tag.UID{0x38365DC6227700FB, 0x39ACAA81B253C797}, Text: "item.series.asset.Tag"}, // 1s6tf-wd8mr-03xmmc-5bh6t-57jwr
+	SeriesS2T:      tag.Name{ID: tag.UID{0x749CA29A38DAA5BF, 0x7139081806CBF2C5}, Text: "item.series.S2.UTC64"},  // 3nmkj-9nf6u-nqzr2f-88303-drwq5
 
-	NodeAttr: tag.Name{ID: tag.UID{0x93F76E7915DC92BF, 0x6DD22A7FFF8A1FA8}, Text: "node"}, // 4my-xr7k5fwkbz-qvnjbgzzsn-7x8
+	NodeAttr: tag.Name{ID: tag.UID{0x93F76E7915DC92BF, 0x6DD22A7FFF8A1FA8}, Text: "node"}, // 4myxr-7k5fw-kbzqvn-jbgzz-sn7x8
 
-	NodeSealedStatus: tag.Name{ID: tag.UID{0x82E0C4CA8CCF5457, 0x64FCB69611D22D16}, Text: "node.sealed.Status"}, // 42w-32dp36gbjc-q9z5qks8x4-c8q
+	NodeSealedStatus: tag.Name{ID: tag.UID{0x82E0C4CA8CCF5457, 0x64FCB69611D22D16}, Text: "node.sealed.Status"}, // 42w32-dp36g-bjcq9z-5qks8-x4c8q
 
-	ChannelAttr: tag.Name{ID: tag.UID{0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60}, Text: "channel"}, // 1w1-g6c4s58c1k-d9rwf3mdsc-rc0
+	ChannelAttr: tag.Name{ID: tag.UID{0x3C0BCCB260A85864, 0xC4DF8E1CD985DD60}, Text: "channel"}, // 1w1g6-c4s58-c1kd9r-wf3md-scrc0
 
-	ChannelType: tag.Name{ID: tag.UID{0xE16EE14B4532E786, 0x8166AD32465165B0}, Text: "channel.type"}, // 71e-vhnqj9kwy3-82tpe69352-teh
+	ChannelType: tag.Name{ID: tag.UID{0xE16EE14B4532E786, 0x8166AD32465165B0}, Text: "channel.type"}, // 71evh-nqj9k-wy382t-pe693-52teh
 
-	ChannelTypeSpreadsheet: tag.Name{ID: tag.UID{0x1C0062A36805F2FB, 0xC37F9A8B51C0A909}, Text: "channel.type.Spreadsheet"}, // 0w0-1jb6u05ycx-w6zwuje8w1-b89
+	ChannelTypeSpreadsheet: tag.Name{ID: tag.UID{0x1C0062A36805F2FB, 0xC37F9A8B51C0A909}, Text: "channel.type.Spreadsheet"}, // 0w01j-b6u05-ycxw6z-wuje8-w1b89
 
-	SessionStatusAttr: tag.Name{ID: tag.UID{0x7FB381BC8DB19B28, 0xE3EC642BF561552B}, Text: "session.Status"}, // 3zq-f0vt3ejmdn-f7v345guq2-p9c
+	SessionStatusAttr: tag.Name{ID: tag.UID{0x7FB381BC8DB19B28, 0xE3EC642BF561552B}, Text: "session.Status"}, // 3zqf0-vt3ej-mdnf7v-345gu-q2p9c
 }
 
 var ID = struct {
@@ -78,9 +78,9 @@ var ID = struct {
 	TestNet       tag.Name
 	BestShow      tag.Name
 }{
-	SiteDownloads: tag.Name{ID: tag.UID{0xB30A33823CA36F9E, 0x379DE2617633209C}, Text: "http://acme.com/downloads/"},          // 5m1-8ts4g53eyg-3g7g2d5v36-84w
-	TestNet:       tag.Name{ID: tag.UID{0x46407EE5F0A5436F, 0xDC383E0601E3386A}, Text: "your-scheme://server.com:23382/path"}, // 268-1zfcw558er-xsf1y0s0y6-f3b
-	BestShow:      tag.Name{ID: tag.UID{0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41}, Text: "Fraggle.Rock"},                        // 4um-6x267rss54-67p59q3g7u-zu1
+	SiteDownloads: tag.Name{ID: tag.UID{0xB30A33823CA36F9E, 0x379DE2617633209C}, Text: "http://acme.com/downloads/"},          // 5m18t-s4g53-eyg3g7-g2d5v-3684w
+	TestNet:       tag.Name{ID: tag.UID{0x46407EE5F0A5436F, 0xDC383E0601E3386A}, Text: "your-scheme://server.com:23382/path"}, // 2681z-fcw55-8erxsf-1y0s0-y6f3b
+	BestShow:      tag.Name{ID: tag.UID{0x9A99BA231EF8C148, 0x63D4A9B0DE7D7F41}, Text: "Fraggle.Rock"},                        // 4um6x-267rs-s5467p-59q3g-7uzu1
 }
 
 var (

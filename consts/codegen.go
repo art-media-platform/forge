@@ -75,10 +75,10 @@ func (decls declSet) needsUID() bool {
 // resolvedEntry holds pre-computed data for one tag entry output line.
 // All entries are tag.Name — callers use .ID when they need the UID.
 type resolvedEntry struct {
-	varName string
-	literal string   // the "literal" from the .consts.sdl source
-	text    string   // case-preserved dot-delimited tag expression
-	base32  string   // 27-char Crockford Base32 UID
+	varName       string
+	literal       string   // the "literal" from the .consts.sdl source
+	text          string   // case-preserved dot-delimited tag expression
+	base32        string   // tag.UID.Base32() render (5-5-6-5-5)
 	uidHi         uint64   // pre-computed UID[0]
 	uidLo         uint64   // pre-computed UID[1]
 	flags         []string // effective flags: own if declared, else inherited
