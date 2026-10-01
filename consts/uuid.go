@@ -53,8 +53,8 @@ func rewriteOne(cd *ConstDecl) error {
 	return nil
 }
 
-// parseUUIDLiteral parses a UUID string into a big-endian uint64 pair.
-// Matches the encoding amp.SDK previously exposed via UID_FromUUID.
+// parseUUIDLiteral parses a UUID string into a big-endian uint64 pair: hi =
+// bytes 0–7, lo = bytes 8–15.
 func parseUUIDLiteral(s string) (hi, lo uint64, err error) {
 	parsed, err := uuid.FromString(s)
 	if err != nil {
