@@ -5,7 +5,7 @@ go 1.27
 require (
 	github.com/alecthomas/kong v1.16.1
 	github.com/alecthomas/participle/v2 v2.1.4
-	github.com/art-media-platform/amp.SDK v0.283.0
+	github.com/art-media-platform/amp.SDK v0.284.0
 	github.com/gofrs/uuid/v5 v5.5.1
 	google.golang.org/protobuf v1.36.12
 )
