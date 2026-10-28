@@ -62,9 +62,9 @@ var ID = struct {
     TestNet       tag.Name
     BestShow      tag.Name
 }{
-    SiteDownloads: tag.Name{ID: tag.UID{0xB30..., 0x379...}, Canonic: "http://acme.com/downloads/"},
-    TestNet:       tag.Name{ID: tag.UID{0x464..., 0xDC3...}, Canonic: "your-scheme://server.com:23382/path"},
-    BestShow:      tag.Name{ID: tag.UID{0x57B..., 0x78F...}, Canonic: "fraggle.rock"},
+    SiteDownloads: tag.Name{ID: tag.UID{0xB30..., 0x379...}, Text: "http://acme.com/downloads/"},
+    TestNet:       tag.Name{ID: tag.UID{0x464..., 0xDC3...}, Text: "your-scheme://server.com:23382/path"},
+    BestShow:      tag.Name{ID: tag.UID{0x57B..., 0x78F...}, Text: "Fraggle.Rock"},
 }
 
 var (
@@ -82,9 +82,9 @@ Generated **C#** — block-scoped namespace (C# 9 compatible, so it builds under
 ```cs
 namespace your.project {
     public static partial class ID {
-        public static readonly TagName SiteDownloads = new(new(0xB30..., 0x379...), "http://acme.com/downloads/");
-        public static readonly TagName TestNet       = new(new(0x464..., 0xDC3...), "your-scheme://server.com:23382/path");
-        public static readonly TagName BestShow      = new(new(0x57B..., 0x78F...), "fraggle.rock");
+        public static readonly Name SiteDownloads = new(new(0xB30..., 0x379...), "http://acme.com/downloads/");
+        public static readonly Name TestNet       = new(new(0x464..., 0xDC3...), "your-scheme://server.com:23382/path");
+        public static readonly Name BestShow      = new(new(0x57B..., 0x78F...), "Fraggle.Rock");
     }
 
     public static partial class Const {
@@ -95,20 +95,20 @@ namespace your.project {
 }
 ```
 
-Generated **TypeScript** — zero runtime, self-contained types, `bigint` literals so 64-bit values never lose precision:
+Generated **TypeScript** — no runtime parsing or external dependencies, self-contained types, `bigint` literals so 64-bit values never lose precision:
 
 ```ts
 export type UID = readonly [bigint, bigint];
 
 export interface TagName {
     readonly id:      UID;
-    readonly canonic: string;
+    readonly text:    string;
 }
 
 export const ID = {
-    SiteDownloads: { id: [0xB30...n, 0x379...n], canonic: "http://acme.com/downloads/" },
-    TestNet      : { id: [0x464...n, 0xDC3...n], canonic: "your-scheme://server.com:23382/path" },
-    BestShow     : { id: [0x57B...n, 0x78F...n], canonic: "fraggle.rock" },
+    SiteDownloads: { id: [0xB30...n, 0x379...n], text: "http://acme.com/downloads/" },
+    TestNet      : { id: [0x464...n, 0xDC3...n], text: "your-scheme://server.com:23382/path" },
+    BestShow     : { id: [0x57B...n, 0x78F...n], text: "Fraggle.Rock" },
 } satisfies Record<string, TagName>;
 
 export const VendorAPIKey: UID = [0x550...n, 0xA71...n];
@@ -127,13 +127,13 @@ UID = tuple[int, int]
 
 class TagName(NamedTuple):
     id:      UID
-    canonic: str
+    text:    str
 
 
 class ID:
     SiteDownloads = TagName((0xB30..., 0x379...), "http://acme.com/downloads/")
     TestNet       = TagName((0x464..., 0xDC3...), "your-scheme://server.com:23382/path")
-    BestShow      = TagName((0x57B..., 0x78F...), "fraggle.rock")
+    BestShow      = TagName((0x57B..., 0x78F...), "Fraggle.Rock")
 
 
 VendorAPIKey: UID = (0x550..., 0xA71...)
@@ -155,7 +155,7 @@ static const struct {
 } ID FORGE_UNUSED = {
     .SiteDownloads = { { 0xB30..., 0x379... }, "http://acme.com/downloads/" },
     .TestNet       = { { 0x464..., 0xDC3... }, "your-scheme://server.com:23382/path" },
-    .BestShow      = { { 0x57B..., 0x78F... }, "fraggle.rock" },
+    .BestShow      = { { 0x57B..., 0x78F... }, "Fraggle.Rock" },
 };
 
 static const struct {
@@ -173,16 +173,16 @@ static const struct {
 
 Every name compiles to a 128-bit identifier from the [`stdlib/tag`](https://github.com/art-media-platform/amp.SDK/blob/main/stdlib/tag/README.md) package of [amp.SDK](https://github.com/art-media-platform/amp.SDK) — a phonetic, search-friendly addressing system worth reading about in its own right. Forge emits these depending on the language:
 
-| Language | `UID` | `TagName` |
+| Language | `UID` | Name type |
 |---|---|---|
 | Go | `tag.UID` (two `uint64`) | `tag.Name` (struct) |
-| C# | `UID` (two `ulong`) | `TagName` (readonly struct) |
+| C# | `UID` (two `ulong`) | `Name` (readonly struct) |
 | TypeScript | `readonly [bigint, bigint]` | `TagName` (interface) |
 | Python | `tuple[int, int]` | `TagName` (NamedTuple) |
 | C | `TagUID` (two `uint64_t`) | `TagName` (struct) |
 
 
-Either way, three things matter to forge users:
+These declarations provide:
 
 - **Resilient short label** — `id.Base32()` gives a compact, human-safe string with no look-alike characters. Forge embeds it as a trailing comment on every generated line, so the readable label always sits beside the binary value.
 - **No runtime parsing** — the value is already a literal in your generated code; forge parsed it at codegen time. Your binary never parses a UUID string at startup unless *you* hand it one — no startup hashing, no parse-error branch, no cross-language library-version skew.
